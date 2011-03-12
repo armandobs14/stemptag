@@ -1,5 +1,6 @@
 package temporal;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -7,6 +8,7 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
@@ -97,13 +99,34 @@ public class CRFFeatureExtractor implements com.aliasi.crf.ChainCrfFeatureExtrac
         
         public ChunkerFeatures(List<String> tokens, List<String> tags) {
             super(tokens,tags);
-            if ( hmmPOSModelFile!=null ) try {
+            InputStream in = null;
+            BufferedInputStream bufIn = null;
+            ObjectInputStream objIn = null;
+            String resourceName = "/models/pos-en-general-brown.HiddenMarkovModel";
+            if ( hmmPOSModelFile!=null )try {
+                in = this.getClass().getResourceAsStream(resourceName);
+                if (in == null) {
+                    String msg = "Could not open stream for resource="
+                        + resourceName;
+                    throw new IOException(msg);
+                }
+                bufIn = new BufferedInputStream(in);
+                objIn = new ObjectInputStream(bufIn);
+                HiddenMarkovModel hmmPos = ((HiddenMarkovModel)(objIn.readObject()));
+                objIn.close();
+                Streams.closeQuietly(bufIn);
+                Streams.closeQuietly(in);
+            	mPosTagging = new HmmDecoder(hmmPos,null,new FastCache<String,double[]>(100000)).tag(tokens);
+             
+        	}catch ( Exception e ) { e.printStackTrace(); }
+            
+      /*      if ( hmmPOSModelFile!=null ) try {
             	ObjectInputStream obj = new ObjectInputStream(new FileInputStream(new File(hmmPOSModelFile)));
             	HiddenMarkovModel hmmPos = ((HiddenMarkovModel)(obj.readObject()));
             	obj.close();
             	mPosTagging = new HmmDecoder(hmmPos,null,new FastCache<String,double[]>(100000)).tag(tokens);
             } catch ( Exception e ) { e.printStackTrace(); }
-            else mPosTagging = null;
+            else mPosTagging = null;*/
         }
         
         public Map<String,? extends Number> nodeFeatures(int n) {

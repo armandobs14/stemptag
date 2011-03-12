@@ -52,8 +52,8 @@
  <div id="description">
   <p><b>This Demo:</b> TIMEX Resolution Demo for the English language using combinations of rule-based and machine learning methods.</p>
  </div>
- <form name="demo_form" action="/timex-demo/timex/response.xml" method="post">
-  <div id="license"><p><b>Terms of Use:</b> This demo is for evaluation purposes only. Please do not overload our server. <a href="http://">Contact the DMIR group of INESC-ID</a> about other uses.</p></div>
+ <form name="demo_form" action="/timex/response.xml" method="post">
+  <div id="license"><p><b>Terms of Use:</b> This demo is for evaluation purposes only. Please do not overload our server. <a href="http://dmir.inesc-id.pt/">Contact the DMIR group of INESC-ID</a> about other uses.</p></div>
   <div id="input">
   <h4>Text Input</h4>
    <textarea cols="60" name="inputText" rows="12"></textarea>
@@ -68,11 +68,11 @@
   <div id="params">
    <h4>demoType</h4>
    <select onChange="document.demo_form.action=options[selectedIndex].value;" name="demoType" title="The type of text mining task. Default is English TIMEX resolution.">
-   <option value="/timex-demo/timex/response.xml"> English TIMEX resolution with rules </option>
-   <option value="/timex-demo/timex-ml/response.xml"> English TIMEX resolution with ML </option>
-   <option value="/timex-demo/pos_en/response.xml"> English POS tagging </option>
-   <option value="/timex-demo/sentences/response.xml"> Sentence splitting </option>
-   <option value="/timex-demo/language/response.xml"> Language identification </option>
+   <option value="/timex/response.xml"> English TIMEX resolution with rules </option>
+   <option value="/timex-ml/response.xml"> English TIMEX resolution with ML </option>
+   <option value="/pos_en/response.xml"> English POS tagging </option>
+   <option value="/sentences/response.xml"> Sentence splitting </option>
+   <option value="/language/response.xml"> Language identification </option>
    </select>
    <h4>inCharset</h4>
    <select name="inCharset" title="Character encoding of input. All encodings shown, default first.">
@@ -439,7 +439,7 @@ Set the output character encoding to any value; it need not match the input char
 <li>
 Cut-and-paste or enter text in the specified character encoding. Alternatively, if you want to analyze a file, use the file input form.
 </li>
-</ul><h3>For more info: <a href="http://">Contact the developer, Vitor Loureiro</a>.</h3>
+</ul><h3>For more info: <a href="https://fenix.ist.utl.pt/homepage/ist159097">Contact the developer, Vitor Loureiro</a>.</h3>
 </div>
 </div>
 </body>
