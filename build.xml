@@ -1,0 +1,112 @@
+<project name="TIMEX Demo" default="compile" basedir=".">
+
+  <property name="app.name" value="timex-demo"/>
+  <property name="manager.url" value="http://localhost:8080/manager/" />
+  <property name="manager.username" value="admin"/>
+  <property name="manager.password" value="admin"/>
+
+  <path id="classpath.standard">
+  		<pathelement location="/usr/share/java/lingpipe.jar"/>
+  	    <pathelement location="/usr/share/java/commons-fileupload.jar"/>
+  	    <pathelement location="/usr/share/java/commons-io.jar" />  <!-- is anyone using this? -->
+  	    <pathelement location="/usr/share/java/nekohtml.jar" />
+  	    <pathelement location="/usr/share/java/servlet-api.jar" />
+  	    <pathelement location="/usr/share/java/weka.jar"/>
+  	    <pathelement location="/usr/share/java/ngramj.jar"/>
+  	  	<pathelement location="/usr/share/java/xml-apis.jar" />
+  	    <pathelement location="/usr/share/java/xercesImpl.jar" />
+  	    <pathelement location="/usr/share/java/joda-time-1.6.2.jar" />
+  	    <pathelement location="/usr/share/java/java-cup-11a.jar" />
+  	    <pathelement location="bin"/>
+   </path>
+
+<!--  <target name="clean">
+    <delete dir="war"/>
+    <delete file="${app.name}.jar"/>
+    <delete file="${app.name}.war"/>
+  </target>-->
+
+  <target name="compile">
+    <mkdir dir="bin"/>
+    <javac includeAntRuntime="false" srcdir="src" destdir="bin" debug="yes" deprecation="yes" optimize="yes">
+      <compilerarg value="-Xlint:all"/>
+      <classpath refid="classpath.standard"/>
+    </javac>
+  </target>
+
+	<target name="jar" depends="compile">
+	    <jar destfile="${app.name}.jar">
+		  <fileset dir="src" includes="**/*"/>
+	      <fileset dir="bin" includes="**/*.class"/>
+	    </jar>
+	  </target>
+	
+	<target name="models" depends="jar">
+		    <java classname="temporal.ModelTraining" fork="true">
+		      <classpath refid="classpath.standard"/>
+		       <arg value="/Users/vitorloureiro/Desktop/TIMEXResolution/Datasets/WikiWars"/>
+		    </java>
+			<delete file="${app.name}.jar"/>
+		  </target>
+
+  <target name="client" depends="jar">
+    <java classname="temporal.web.TIMEXClient" fork="true">
+      <compilerarg value="-Xlint:all"/>
+      <classpath refid="classpath.standard"/>
+       <arg value="-serverUrl=http://localhost:8080/lingpipe-demo/echo/response.xml"/>
+       <arg value="-inputFile=temp.txt"/>
+       <arg value="-outputFile=temp.out.txt"/>
+    </java>
+  </target>
+
+	<target name="war" depends="jar">
+	    <mkdir dir="war"/>
+	    <copy todir="war"><fileset dir="war"/></copy>
+	  	<mkdir dir="war/WEB-INF/lib"/>
+	    <copy todir="war/WEB-INF/lib">
+	      <fileset file="${app.name}.jar"/>
+	      <fileset file="/usr/share/java/lingpipe.jar"/>
+	      <fileset file="/usr/share/java/commons-fileupload.jar"/>
+	      <fileset file="/usr/share/java/commons-io.jar"/>
+	      <fileset file="/usr/share/java/nekohtml.jar"/>
+	      <fileset file="/usr/share/java/xml-apis.jar"/>
+	      <fileset file="/usr/share/java/weka.jar"/>
+	      <fileset file="/usr/share/java/ngramj.jar"/>
+	 	  <fileset file="/usr/share/java/xercesImpl.jar"/>
+	      <fileset file="/usr/share/java/joda-time-1.6.2.jar" />
+	    </copy>
+	    <jar destfile="war/WEB-INF/lib/models.jar">
+	      <fileset dir="." includes="models/timex.model.crf" />
+	      <fileset dir="." includes="models/pos-en-general-brown.HiddenMarkovModel" />
+	      <fileset dir="." includes="models/javascript-literals.xsl" />
+	      <fileset dir="." includes="models/xml-to-string.xsl" />
+	      <fileset dir="." includes="models/WordsList.lex" />
+	    </jar>
+		<jar destfile="war/WEB-INF/lib/regressionModel.jar">
+		<fileset dir="." includes="regressionModel/RegressionModel.svm" />
+		</jar>
+	    <jar destfile="${app.name}.war">
+	      <fileset dir="war"/>
+	    </jar>
+		<!--<delete dir="war"/>-->
+	  	<!--<delete dir="models"/>-->
+	  	<delete file="${app.name}.jar"/>
+	  </target>
+
+  <target name="deploy" depends="war">
+    <taskdef name="deploy" classname="org.apache.catalina.ant.DeployTask"/>
+    <deploy url="${manager.url}" 
+            username="${manager.username}" 
+            password="${manager.password}" 
+            path="/${app.name}" 
+            war="build/${app.name}.war"/>
+  </target>
+
+  <target name="undeploy">
+    <taskdef name="undeploy" classname="org.apache.catalina.ant.UndeployTask"/>
+    <undeploy url="${manager.url}" username="${manager.username}" password="${manager.password}" path="/${app.name}"/>
+  </target>
+
+  <target name="redeploy" depends="undeploy,deploy"/>
+
+</project>

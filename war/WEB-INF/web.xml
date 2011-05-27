@@ -1,0 +1,139 @@
+<?xml version="1.0"?>
+<!DOCTYPE web-app PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.2//EN" "http://java.sun.com/j2ee/dtds/web-app_2_2.dtd">
+<web-app>
+
+ <display-name>TIMEX Web Demo</display-name>
+ <description>TIMEX Web Demo</description>
+
+ <filter>
+  <filter-name>AccessLimitFilter</filter-name>
+  <filter-class>temporal.web.AccessLimitFilter</filter-class>
+  <init-param>
+    <param-name>maxAccesses</param-name>
+    <param-value>32</param-value>
+  </init-param>
+  <init-param>
+    <param-name>resetInterval</param-name>
+    <param-value>8640000</param-value>  <!-- 1 day in ms -->
+  </init-param>
+ </filter>
+ <filter-mapping>
+  <filter-name>AccessLimitFilter</filter-name>
+  <url-pattern>*.xml</url-pattern>
+ </filter-mapping>
+ 
+ <!--<filter>
+ <filter-name>XSLTFilter</filter-name>
+ <filter-class>temporal.web.XSLTFilter</filter-class>
+ <init-param>
+   <param-name>stylesheetPath</param-name>
+   <param-value>/javascript-literals.xsl</param-value>
+ </init-param>
+</filter>
+<filter-mapping>
+ <filter-name>XSLTFilter</filter-name>
+ <url-pattern>*.xml</url-pattern>
+</filter-mapping>-->
+
+<!--<filter>
+ <filter-name>XSLTFilter</filter-name>
+ <filter-class>temporal.web.XSLTOutputStreamFilter</filter-class>
+ <init-param>
+   <param-name>xsltPath</param-name>
+   <param-value>/models/javascript-literals.xsl</param-value>
+ </init-param>
+</filter>
+<filter-mapping>
+ <filter-name>XSLTFilter</filter-name>
+ <url-pattern>*.xml</url-pattern>
+</filter-mapping>-->
+    
+
+<!-- Models -->
+
+ <servlet>
+  <servlet-name>ResourceServlet</servlet-name>
+  <servlet-class>temporal.web.ModelsServlet</servlet-class>
+ </servlet>
+ <servlet-mapping>
+  <servlet-name>ResourceServlet</servlet-name>
+  <url-pattern>/resource/*</url-pattern> <!-- star allows it to pick up path -->
+ </servlet-mapping>
+
+ <!-- Demo: Sentence Boundaries -->
+
+ <servlet>
+  <servlet-name>Sentences</servlet-name>
+  <servlet-class>temporal.web.DemoServlet</servlet-class>
+  <init-param>
+    <param-name>demoConstructor</param-name>
+    <param-value>temporal.web.SentenceDemo</param-value>
+  </init-param>
+  <init-param>
+    <param-name>demoConstructorArgs</param-name>
+    <param-value>com.aliasi.tokenizer.IndoEuropeanTokenizerFactory,com.aliasi.sentences.IndoEuropeanSentenceModel,English News</param-value>
+  </init-param>
+ </servlet>
+ <servlet-mapping>
+  <servlet-name>Sentences</servlet-name>
+  <url-pattern>/sentences/*</url-pattern> 
+ </servlet-mapping>
+
+ <!-- Demo: Part-of-Speech -->
+
+ <servlet>
+  <servlet-name>PosEnglish</servlet-name>
+  <servlet-class>temporal.web.DemoServlet</servlet-class>
+  <init-param>
+    <param-name>demoConstructor</param-name>
+    <param-value>temporal.web.PosDemo</param-value>
+  </init-param>
+  <init-param>
+    <param-name>demoConstructorArgs</param-name>
+    <param-value>com.aliasi.tokenizer.IndoEuropeanTokenizerFactory,com.aliasi.sentences.IndoEuropeanSentenceModel,/models/pos-en-general-brown.HiddenMarkovModel,0,0,General English trained on the Brown Corpus</param-value>
+  </init-param>
+ </servlet>
+ <servlet-mapping>
+  <servlet-name>PosEnglish</servlet-name>
+  <url-pattern>/pos_en/*</url-pattern> 
+ </servlet-mapping>
+
+ <!-- Demo: Timex Resolution with basis on Rules -->
+
+ <servlet>
+  <servlet-name>Timex</servlet-name>
+  <servlet-class>temporal.web.DemoServlet</servlet-class>
+  <init-param>
+    <param-name>demoConstructor</param-name>
+    <param-value>temporal.web.TIMEXDemo</param-value>
+  </init-param>
+  <init-param>
+    <param-name>demoConstructorArgs</param-name>
+    <param-value>com.aliasi.tokenizer.IndoEuropeanTokenizerFactory,com.aliasi.sentences.IndoEuropeanSentenceModel,rules.TIMEXRuleAnnotator, ,TIMEX Resolution for English using a rule-based approach</param-value>
+  </init-param>
+ </servlet>
+ <servlet-mapping>
+  <servlet-name>Timex</servlet-name>
+  <url-pattern>/timex/*</url-pattern> 
+ </servlet-mapping>
+
+ <!-- Demo: Timex Resolution with Machine Learning -->
+
+ <servlet>
+  <servlet-name>TimexML</servlet-name>
+  <servlet-class>temporal.web.DemoServlet</servlet-class>
+  <init-param>
+    <param-name>demoConstructor</param-name>
+    <param-value>temporal.web.TIMEXDemo</param-value>
+  </init-param>
+  <init-param>
+    <param-name>demoConstructorArgs</param-name>
+    <param-value>com.aliasi.tokenizer.IndoEuropeanTokenizerFactory,com.aliasi.sentences.IndoEuropeanSentenceModel,/models/timex.model.crf,/regressionModel/RegressionModel.svm,TIMEX Resolution for English trained on the WikiWars Corpus</param-value>
+  </init-param>
+ </servlet>
+ <servlet-mapping>
+  <servlet-name>TimexML</servlet-name>
+  <url-pattern>/timex-ml/*</url-pattern> 
+ </servlet-mapping>
+
+</web-app>
