@@ -1,13 +1,5 @@
 package temporal;
 
-import com.aliasi.chunk.Chunk;
-import com.aliasi.chunk.Chunking;
-import com.aliasi.chunk.ChunkFactory;
-import com.aliasi.chunk.ChunkingImpl;
-import com.aliasi.corpus.ObjectHandler;
-import com.aliasi.corpus.XMLParser;
-import com.aliasi.tokenizer.TokenizerFactory;
-import com.aliasi.xml.DelegatingHandler;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,24 +7,30 @@ import org.joda.time.DateTime;
 import org.xml.sax.Attributes;
 import org.xml.sax.helpers.DefaultHandler;
 
-public class TIMEXChunkParser extends XMLParser<ObjectHandler> {
+import com.aliasi.chunk.ChunkFactory;
+import com.aliasi.chunk.Chunking;
+import com.aliasi.corpus.ObjectHandler;
+import com.aliasi.corpus.XMLParser;
+import com.aliasi.tokenizer.TokenizerFactory;
+import com.aliasi.xml.DelegatingHandler;
 
+public class TIMEXDurationChunkParser extends XMLParser<ObjectHandler>{
 	private static final long serialVersionUID = 6281374154299530460L;
 	  
 	private TokenizerFactory tokenizer;
 	
 	String mSentenceTag = "p";
     
-    public TIMEXChunkParser() {
+    public TIMEXDurationChunkParser() {
         super();
     }
     
-    public TIMEXChunkParser(TokenizerFactory factory) {
+    public TIMEXDurationChunkParser(TokenizerFactory factory) {
         super();
         tokenizer = factory;
     }
 
-    public TIMEXChunkParser(ObjectHandler handler) {
+    public TIMEXDurationChunkParser(ObjectHandler handler) {
         super(handler);
     }
 
@@ -64,7 +62,6 @@ public class TIMEXChunkParser extends XMLParser<ObjectHandler> {
         StringBuilder mBuf;
         String mType;
         String valAttribute;
-        String setAttribute;
         int mStart;
         int mEnd;
         final List<NormalizedChunk> mChunkList = new ArrayList<NormalizedChunk>();
@@ -91,7 +88,6 @@ public class TIMEXChunkParser extends XMLParser<ObjectHandler> {
             mType = qName;//TODO: attributes.getValue("TYPE");
             mStart = mBuf.length();
             valAttribute = attributes.getValue("val");
-            setAttribute = attributes.getValue("set");
         }
         @Override
         public void endElement(String uri, String localName, String qName) {
@@ -99,39 +95,6 @@ public class TIMEXChunkParser extends XMLParser<ObjectHandler> {
             mEnd = mBuf.length();
             NormalizedChunk chunk = new NormalizedChunk(ChunkFactory.createChunk(mStart,mEnd,mType,0));
             chunk.setNormalized(valAttribute);
-            if (valAttribute == null){
-            	CandidateCreation.count_expressions_misc++;
-            	chunk.setType(7);
-            }
-            else if (valAttribute.equals("")){
-            	CandidateCreation.count_expressions_misc++;
-            	chunk.setType(7);
-            }
-            else if (setAttribute != null && setAttribute.toLowerCase().equals("yes")){
-            	CandidateCreation.count_expressions_rec++;
-            	chunk.setType(1);
-            }
-            else if (valAttribute.toLowerCase().equals("past_ref")){
-            	CandidateCreation.count_expressions_past++;
-            	chunk.setType(4);
-            }
-            else if (valAttribute.toLowerCase().equals("present_ref")){
-            	CandidateCreation.count_expressions_present++;
-            	chunk.setType(5);
-            }
-            else if (valAttribute.toLowerCase().equals("future_ref")){
-            	CandidateCreation.count_expressions_future++;
-            	chunk.setType(6);
-            }
-            else if (valAttribute.toLowerCase().contains("p") || valAttribute.toLowerCase().contains("pt")){
-            	CandidateCreation.count_duration++;
-            	chunk.setType(2);
-            }
-            else{
-            	CandidateCreation.count_point++;
-            	chunk.setType(3);
-            }
-            
             mChunkList.add(chunk);
         }
         @Override
@@ -141,11 +104,13 @@ public class TIMEXChunkParser extends XMLParser<ObjectHandler> {
         public Chunking getChunking() {
         	NormalizedChunking chunking = new NormalizedChunking(mBuf);
             for (NormalizedChunk chunk : mChunkList){
-          //  	if (chunk.getType() == 6)
-            		chunking.add(chunk);
+            	if (chunk.getNormalized() != null)
+	            	if (chunk.getNormalized().contains("P") && !chunk.getNormalized().contains("REF")){
+	            		System.out.println("Expressão temporal duração: "+chunk.getNormalized());
+	            		chunking.add(chunk);
+	            	}
             }
             return chunking;
         }
     }
-    
 }

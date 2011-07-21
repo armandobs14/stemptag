@@ -40,6 +40,7 @@ import com.aliasi.util.AbstractExternalizable;
 public class ModelTraining {
 	
 	private static String path = ".";
+	private static String pathModel = ".";
 
 	public static void trainResolver ( File in, File out ) throws Exception {
 		boolean crf = out.getAbsolutePath().endsWith(".crf");
@@ -50,7 +51,7 @@ public class ModelTraining {
 			int minFeatureCount = 1, priorBlockSize = 3, minEpochs = 10, maxEpochs = 5000;
 			double priorVariance = 4.0, initialLearningRate = 0.05, learningRateDecay = 0.995, minImprovement = 0.00001;
 			TagChunkCodec tagChunkCodec = new BioTagChunkCodec(factory,enforceConsistency);
-			ChainCrfFeatureExtractor<String> featureExtractor = new CRFFeatureExtractor(in.getParentFile().getAbsolutePath()+ "/pos-en-general-brown.HiddenMarkovModel", true, true);
+			ChainCrfFeatureExtractor<String> featureExtractor = new CRFFeatureExtractor(in.getParentFile().getParentFile().getAbsolutePath()+ "/../pos-en-general-brown.HiddenMarkovModel", true, true);
 			RegressionPrior prior = RegressionPrior.gaussian( priorVariance, uninformativeIntercept );
 			AnnealingSchedule annealingSchedule = AnnealingSchedule.exponential(initialLearningRate, learningRateDecay);
 	        Reporter reporter = Reporters.stdOut().setLevel(LogLevel.ERROR);
@@ -114,7 +115,7 @@ public class ModelTraining {
 	
 	public static void prepareCorpus ( String path, int percent ) throws IOException {
 	//	PrintWriter test = new PrintWriter(new FileWriter(path+"/../../timex-test.xml"));
-		PrintWriter train = new PrintWriter(new FileWriter(path+"/../../timex-train.xml"));
+		PrintWriter train = new PrintWriter(new FileWriter(path+"/../timex-train.xml"));
 		File files[] = new File(path).listFiles();
 		int split = (int)((double)files.length * ((double)percent / 100.0));
 		System.out.println(split);
@@ -315,12 +316,15 @@ public class ModelTraining {
 		return sentence;	
 	}
 		
-	public static void main ( String args[] ) throws Exception {
-		if(args.length>0) path = args[0];
+	public static void main ( String args[] ) throws Exception {	
+		if(args.length>0){
+			String[] arg = args[0].split(",");
+			path = arg[0];
+			pathModel = arg[1];
+		}
 		System.out.println(path);
-		prepareCorpus(path,70);
-		path = path+"/../..";
-		trainResolver(new File(path+"/timex-train.xml"),new File(path+"/models/timex.model.crf"));
+		prepareCorpus(path,100);
+		trainResolver(new File(path+"/../timex-train.xml"),new File(pathModel+"/timex.model.crf"));
 
 	}
 

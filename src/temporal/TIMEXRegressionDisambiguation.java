@@ -1,6 +1,5 @@
 package temporal;
 
-import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -8,19 +7,14 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.HashMap;
-import java.util.Set;
 import java.util.TreeMap;
-import java.util.TreeSet;
-
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -34,15 +28,10 @@ import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import com.aliasi.hmm.HiddenMarkovModel;
-import com.aliasi.util.AbstractExternalizable;
-
-import temporal.web.TIMEXDemo;
 import weka.classifiers.Classifier;
 import weka.core.Instance;
 import weka.classifiers.functions.SVMreg;
@@ -77,7 +66,6 @@ public class TIMEXRegressionDisambiguation {
 	        is.setCharacterStream(new FileReader(in));
 	        Document doc = db.parse(is);
 			XPath xpath = XPathFactory.newInstance().newXPath();
-		//	NodeList docsTimestamp = (NodeList) xpath.compile("//CREATIONTIME").evaluate(doc, XPathConstants.NODESET);
 			NodeList docs = (NodeList) xpath.compile("//doc").evaluate(doc,	XPathConstants.NODESET);
 			
 			//For each document
@@ -88,14 +76,6 @@ public class TIMEXRegressionDisambiguation {
 	    		CandidateCreation.isFirstTimex = true;
 	    		NodeList elemList = (NodeList) xpath.compile("./p").evaluate(docs.item(n), XPathConstants.NODESET);
 	    		
-	   /* 		if (elemList.getLength() > 0){
-	    			//Computes the document timestamp for each document
-					CandidateCreation.docCreationTime = new DateTime(new String(docsTimestamp.item(n).getTextContent()));
-					System.out.println("Data criação documento: "+CandidateCreation.docCreationTime);
-	    		}*/
-			
-			//returns the document creation date
-		//	CandidateCreation.docCreationTime = new DateTime(new String(xpath.compile("./text()").evaluate((Node) exprDocCreationTime.evaluate(doc, XPathConstants.NODE))));		
 			
 			//For every phrase in the document
 			for ( int i = 0; i < elemList.getLength(); i++ ) try {
@@ -179,6 +159,7 @@ public class TIMEXRegressionDisambiguation {
 	
 	@SuppressWarnings("unchecked")
 	public static String disambiguate ( String timex, ArrayList<Interval> candidates , Classifier model ) {
+		//double maxScore = Double.MIN_VALUE;
 		double maxScore = -1000;
 		Interval bestCandidate = null;
 		ArrayList<String> features;
@@ -186,11 +167,14 @@ public class TIMEXRegressionDisambiguation {
         Interval candidateInterval;
         String featureGranularity = "";
         
-        try{
+        try {
+        //get List of Words from file
+        FileInputStream fi=new FileInputStream("/Users/vitorloureiro/Desktop/Teste3/models/WordsList.lex");  
+        ObjectInputStream oi=new ObjectInputStream(fi); 
+        wordsList= (TreeMap<Integer,String>)oi.readObject();    
+        oi.close();
         
-        model = TIMEXDemo.regressionModel;
-        wordsList = TIMEXDemo.wordsList;
-        		
+		
 			Iterator<Interval> it = candidates.iterator();
 
 			//Get word features

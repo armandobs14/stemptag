@@ -1,6 +1,5 @@
 package temporal;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -8,8 +7,6 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
@@ -36,7 +33,14 @@ public class CRFFeatureExtractor implements com.aliasi.crf.ChainCrfFeatureExtrac
 	String hmmPOSModelFile;
 	
 	HashSet<String> timeNames;
-    
+	HashSet<String> placeNames;
+	HashSet<String> personNames;
+	HashSet<String> facilityNames;
+	HashSet<String> companyNames;
+	HashSet<String> festivalNames;
+	HashSet<String> titleNames;
+	HashSet<String> governmentNames;
+	
     public CRFFeatureExtractor() throws ClassNotFoundException, IOException { hmmPOSModelFile = null; }
 
     public CRFFeatureExtractor(String hmmPos) { 
@@ -46,8 +50,23 @@ public class CRFFeatureExtractor implements com.aliasi.crf.ChainCrfFeatureExtrac
 	public CRFFeatureExtractor(String hmmPos, boolean dictionaries, boolean pos) { 
 		if(pos && hmmPos!=null) this.hmmPOSModelFile = hmmPos; 
 		if(hmmPos!=null && dictionaries) try {
-			timeNames = readDictionary("/models/timeNames.lst");
-			if (timeNames == null)
+			//timeNames = readDictionary(new File(hmmPos + File.separator + "timeNames.lst"));
+			//timeNames = readDictionary(new File("/Users/vitorloureiro/Desktop/Geo-Temporal/timeNames.lst"));
+			  placeNames = readDictionary(new File("/Users/vitorloureiro/Desktop/Geo-Temporal/PlaceLexicon/lex-all-names.out"));
+			  personNames = readDictionary(new File("/Users/vitorloureiro/Desktop/Geo-Temporal/PlaceLexicon/person.lst")); 
+			  facilityNames = readDictionary(new File("/Users/vitorloureiro/Desktop/Geo-Temporal/PlaceLexicon/facility.lst"));
+			  companyNames = readDictionary(new File("/Users/vitorloureiro/Desktop/Geo-Temporal/PlaceLexicon/company.lst"));
+			  festivalNames = readDictionary(new File("/Users/vitorloureiro/Desktop/Geo-Temporal/PlaceLexicon/festival.lst"));
+			  titleNames = readDictionary(new File("/Users/vitorloureiro/Desktop/Geo-Temporal/PlaceLexicon/title.lst"));
+			  governmentNames = readDictionary(new File("/Users/vitorloureiro/Desktop/Geo-Temporal/PlaceLexicon/government.lst"));
+			  System.out.println("TamanhoPlaceNames: "+placeNames.size());
+			  System.out.println("TamanhoPlaceNames: "+personNames.size());
+			  System.out.println("TamanhoPlaceNames: "+facilityNames.size());
+			  System.out.println("TamanhoPlaceNames: "+companyNames.size());
+			  System.out.println("TamanhoPlaceNames: "+festivalNames.size());
+			  System.out.println("TamanhoPlaceNames: "+titleNames.size());
+			  System.out.println("TamanhoPlaceNames: "+governmentNames.size());
+			if (placeNames == null)
 				throw new Exception();
 		} catch ( Exception e ) { e.printStackTrace(); }
 	}
@@ -56,35 +75,16 @@ public class CRFFeatureExtractor implements com.aliasi.crf.ChainCrfFeatureExtrac
     
     Object writeReplace() { return this; }
     
-    public HashSet<String> readDictionary ( String path ) throws IOException {
-    	
-    	InputStream in = null;
+    public static HashSet<String> readDictionary ( File data ) throws IOException {
+    	if (!data.exists()) return null;
     	HashSet<String> set = new HashSet<String>();
-        String resourceName = path;
-        if ( hmmPOSModelFile!=null )try {
-            in = this.getClass().getResourceAsStream(resourceName);
-            if (in == null) {
-                String msg = "Could not open stream for resource="
-                    + resourceName;
-                throw new IOException(msg);
-            }
-            
-            BufferedReader reader
-            = new BufferedReader(new InputStreamReader(in));
-            
-            String aux;
-        	while ((aux=reader.readLine())!=null) 
-        		if(aux.trim().length() > 0){ 
-        			set.add(aux.toLowerCase().trim());
-        		}
-        	
-        	reader.close();
-            in.close();  
-            return set;
-        }catch ( Exception e ) { e.printStackTrace(); }
-        
-        return null;
-        
+    	BufferedReader reader = new BufferedReader(new FileReader(data));
+    	String aux;
+    	while ((aux=reader.readLine())!=null) 
+    		if(aux.trim().length() > 0){ 
+    			set.add(aux.toLowerCase().trim());
+    		}
+    	return set;
     }
     
     public static HiddenMarkovModel trainPOStagger ( File inputPath, File output ) throws Exception {
@@ -124,10 +124,10 @@ public class CRFFeatureExtractor implements com.aliasi.crf.ChainCrfFeatureExtrac
         
     	public ChunkerFeatures(List<String> tokens, List<String> tags) {
             super(tokens,tags);
-            InputStream in = null;
+         /*   InputStream in = null;
             BufferedInputStream bufIn = null;
             ObjectInputStream objIn = null;
-            String resourceName = "/models/pos-en-general-brown.HiddenMarkovModel";
+            String resourceName = "/Users/vitorloureiro/Desktop/Teste/models/pos-en-general-brown.HiddenMarkovModel";
             if ( hmmPOSModelFile!=null )try {
                 in = this.getClass().getResourceAsStream(resourceName);
                 if (in == null) {
@@ -143,7 +143,15 @@ public class CRFFeatureExtractor implements com.aliasi.crf.ChainCrfFeatureExtrac
                 in.close();
             	mPosTagging = new HmmDecoder(hmmPos,null,new FastCache<String,double[]>(100000)).tag(tokens);
              
-        	}catch ( Exception e ) { e.printStackTrace(); }
+        	}catch ( Exception e ) { e.printStackTrace(); }*/
+            
+            if ( hmmPOSModelFile!=null ) try {
+            	ObjectInputStream obj = new ObjectInputStream(new FileInputStream(new File(hmmPOSModelFile)));
+            	HiddenMarkovModel hmmPos = ((HiddenMarkovModel)(obj.readObject()));
+            	obj.close();
+            	mPosTagging = new HmmDecoder(hmmPos,null,new FastCache<String,double[]>(100000)).tag(tokens);
+            } catch ( Exception e ) { e.printStackTrace(); }
+            else mPosTagging = null;
         }
         
         public Map<String,? extends Number> nodeFeatures(int n) {
@@ -173,15 +181,81 @@ public class CRFFeatureExtractor implements com.aliasi.crf.ChainCrfFeatureExtrac
             	if (!bos) feats.set("POS_PREV_" + prevPosTag,1.0);
             	if (!eos) feats.set("POS_NEXT_" + nextPosTag,1.0);
 			}
-			if ( timeNames!=null ) {
-            	if (timeNames.contains(token.toLowerCase())){
-            		feats.set("TNAMES",1.0);
+			if ( placeNames!=null ) {
+            	if (placeNames.contains(token.toLowerCase())){
+            		feats.set("PNAMES",1.0);
             	}
-            	if (!bos && timeNames.contains(prevToken.toLowerCase())){
-            		feats.set("TNAMES_PREV",1.0);
+            	if (!bos && placeNames.contains(prevToken.toLowerCase())){
+            		feats.set("PNAMES_PREV",1.0);
             	}
-            	if (!eos && timeNames.contains(nextToken.toLowerCase())){
-            		feats.set("TNAMES_NEXT",1.0);
+            	if (!eos && placeNames.contains(nextToken.toLowerCase())){
+            		feats.set("PNAMES_NEXT",1.0);
+            	}
+			}
+			if ( personNames!=null ) {
+            	if (personNames.contains(token.toLowerCase())){
+            		feats.set("PRNAMES",1.0);
+            	}
+            	if (!bos && personNames.contains(prevToken.toLowerCase())){
+            		feats.set("PRNAMES_PREV",1.0);
+            	}
+            	if (!eos && personNames.contains(nextToken.toLowerCase())){
+            		feats.set("PRNAMES_NEXT",1.0);
+            	}
+			}
+			if ( facilityNames!=null ) {
+            	if (facilityNames.contains(token.toLowerCase())){
+            		feats.set("FNAMES",1.0);
+            	}
+            	if (!bos && facilityNames.contains(prevToken.toLowerCase())){
+            		feats.set("FNAMES_PREV",1.0);
+            	}
+            	if (!eos && facilityNames.contains(nextToken.toLowerCase())){
+            		feats.set("FNAMES_NEXT",1.0);
+            	}
+			}
+			if ( companyNames!=null ) {
+            	if (companyNames.contains(token.toLowerCase())){
+            		feats.set("CNAMES",1.0);
+            	}
+            	if (!bos && companyNames.contains(prevToken.toLowerCase())){
+            		feats.set("CNAMES_PREV",1.0);
+            	}
+            	if (!eos && companyNames.contains(nextToken.toLowerCase())){
+            		feats.set("CNAMES_NEXT",1.0);
+            	}
+			}
+			if ( festivalNames!=null ) {
+            	if (festivalNames.contains(token.toLowerCase())){
+            		feats.set("FSNAMES",1.0);
+            	}
+            	if (!bos && festivalNames.contains(prevToken.toLowerCase())){
+            		feats.set("FSNAMES_PREV",1.0);
+            	}
+            	if (!eos && festivalNames.contains(nextToken.toLowerCase())){
+            		feats.set("FSNAMES_NEXT",1.0);
+            	}
+			}
+			if ( titleNames!=null ) {
+            	if (titleNames.contains(token.toLowerCase())){
+            		feats.set("TTNAMES",1.0);
+            	}
+            	if (!bos && titleNames.contains(prevToken.toLowerCase())){
+            		feats.set("TTNAMES_PREV",1.0);
+            	}
+            	if (!eos && titleNames.contains(nextToken.toLowerCase())){
+            		feats.set("TTNAMES_NEXT",1.0);
+            	}
+			}
+			if ( governmentNames!=null ) {
+            	if (governmentNames.contains(token.toLowerCase())){
+            		feats.set("GNAMES",1.0);
+            	}
+            	if (!bos && governmentNames.contains(prevToken.toLowerCase())){
+            		feats.set("GNAMES_PREV",1.0);
+            	}
+            	if (!eos && governmentNames.contains(nextToken.toLowerCase())){
+            		feats.set("GNAMES_NEXT",1.0);
             	}
 			}
 			for (String suffix : suffixes(token)) feats.set("SUFF_" + suffix,1.0);

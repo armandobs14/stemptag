@@ -113,9 +113,7 @@ public class TIMEXRuleDisambiguation implements Chunker {
     	if (!interval1.overlaps(interval2))
     		return 0;
     	
-    	return interval1.overlap(interval2).toDurationMillis()/between(interval1, interval2);
-    	
-    //	return (float)(interval1.getEndMillis()-interval2.getStartMillis())/(interval2.getEndMillis()-interval1.getStartMillis());	 
+    	return interval1.overlap(interval2).toDurationMillis()/between(interval1, interval2); 
     }
     
     
@@ -320,11 +318,11 @@ public class TIMEXRuleDisambiguation implements Chunker {
 		ArrayList<Interval> toPreviousAnchor = new ArrayList<Interval>();
 		
 		try{
-		System.out.println("isXMLFlag= "+CandidateCreation.isXMLflag);
+		
 		//Verifica se o ficheiro é XML, se for usa como âncora a data de criação do documento
 		if (CandidateCreation.isXMLflag){
 			aux = createCanonicalForm( timeEx, CandidateCreation.docCreationTime );
-			System.out.println("aux= "+aux);
+
 			if (aux == null){
 				CandidateCreation.isNull = true;
 				return null;

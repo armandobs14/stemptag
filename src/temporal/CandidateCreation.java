@@ -16,6 +16,7 @@ public class CandidateCreation {
 	private static HashMap<String,Integer> days = new HashMap<String,Integer>();
 	private static HashMap<String,Integer> ordinals = new HashMap<String,Integer>();
 	public static DateTime docCreationTime;
+	//public static ArrayList<Interval> previousAnchor = new ArrayList<Interval>();
 	public static ArrayList<Long> candidatesMillisecondsSameDoc = new ArrayList<Long>();
 	public static ArrayList<Interval> candidatesIntervalsSameDoc = new ArrayList<Interval>();
 	public static ArrayList<Long> candidatesMillisecondsSameSentence = new ArrayList<Long>();
@@ -29,11 +30,18 @@ public class CandidateCreation {
 	public static boolean docCreationTimePlainText;
 	public static int granularityDuration;//9->Vague
 	public static int past_future_present_null_ref;//4->past 5->present  6->future 7->null 1->Recurrences
+	public static int count_expressions_rec; //->para eliminar depois de fazer
+	public static int count_expressions_present;
+	public static int count_expressions_past;
+	public static int count_expressions_future;
+	public static int count_expressions_misc;
+	public static int count_point;
+	public static int count_duration;
 	
 	public static void init(){
 		
 		docCreationTime = null;
-		isXMLflag = true;
+		isXMLflag = false;
 		isFirstTimex = true;
 		isNull = false;
 		flag = true;
@@ -41,6 +49,13 @@ public class CandidateCreation {
 		docCreationTimePlainText = false;
 		granularityDuration = 0;
 		past_future_present_null_ref = 0;
+		count_expressions_rec = 0;
+		count_expressions_present =0;
+		count_expressions_past=0;
+		count_expressions_future=0;
+		count_expressions_misc=0;
+		count_point=0;
+		count_duration=0;
 		
 		months.put("january",1);
     	months.put("february",2);
