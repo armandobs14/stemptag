@@ -6,25 +6,27 @@
   <property name="manager.password" value="admin"/>
 
   <path id="classpath.standard">
-  		<pathelement location="/usr/share/java/lingpipe.jar"/>
-  	    <pathelement location="/usr/share/java/commons-fileupload.jar"/>
-  	    <pathelement location="/usr/share/java/commons-io.jar" />  <!-- is anyone using this? -->
-  	    <pathelement location="/usr/share/java/nekohtml.jar" />
-  	    <pathelement location="/usr/share/java/servlet-api.jar" />
-  	    <pathelement location="/usr/share/java/weka.jar"/>
-  	    <pathelement location="/usr/share/java/ngramj.jar"/>
-  	  	<pathelement location="/usr/share/java/xml-apis.jar" />
-  	    <pathelement location="/usr/share/java/xercesImpl.jar" />
-  	    <pathelement location="/usr/share/java/joda-time-1.6.2.jar" />
-  	    <pathelement location="/usr/share/java/java-cup-11a.jar" />
-  	    <pathelement location="bin"/>
+    <pathelement location="/usr/share/java/lingpipe.jar"/>
+    <pathelement location="/usr/share/java/commons-fileupload.jar"/>
+    <pathelement location="/usr/share/java/commons-io.jar" />  <!-- is anyone using this? -->
+    <pathelement location="/usr/share/java/nekohtml.jar" />
+    <pathelement location="/usr/share/java/servlet-api.jar" />
+    <pathelement location="/usr/share/java/weka.jar"/>
+    <pathelement location="/usr/share/java/snowball.jar"/>
+  	<pathelement location="/usr/share/java/joda-time.jar"/>
+  	<pathelement location="/usr/share/java/ngramj.jar"/>
+  	<pathelement location="/usr/share/java/xml-apis.jar" />
+    <pathelement location="/usr/share/java/xercesImpl.jar" />
+    <pathelement location="bin"/>
    </path>
 
-<!--  <target name="clean">
-    <delete dir="war"/>
-    <delete file="${app.name}.jar"/>
+  <target name="clean">
+	<delete file="${app.name}.jar"/>
     <delete file="${app.name}.war"/>
-  </target>-->
+  	<delete dir="war"/>
+    <delete dir="bin"/>
+    <mkdir dir="bin"/>
+  </target>
 
   <target name="compile">
     <mkdir dir="bin"/>
@@ -34,76 +36,84 @@
     </javac>
   </target>
 
-	<target name="jar" depends="compile">
-	    <jar destfile="${app.name}.jar">
-		  <fileset dir="src" includes="**/*"/>
-	      <fileset dir="bin" includes="**/*.class"/>
-	    </jar>
-	  </target>
-	
-	<target name="models" depends="jar">
-		    <java classname="temporal.ModelTraining" fork="true">
-		      <classpath refid="classpath.standard"/>
-		       <arg value="/Users/vitorloureiro/Desktop/TIMEXResolution/Datasets/WikiWars"/>
-		    </java>
-			<delete file="${app.name}.jar"/>
-		  </target>
+  <target name="jar" depends="compile">
+    <jar destfile="${app.name}.jar">
+	  <fileset dir="src" includes="**/*"/>
+      <fileset dir="bin" includes="**/*.class"/>
+    </jar>
+  </target>
 
-  <target name="client" depends="jar">
-    <java classname="temporal.web.TIMEXClient" fork="true">
-      <compilerarg value="-Xlint:all"/>
-      <classpath refid="classpath.standard"/>
-       <arg value="-serverUrl=http://localhost:8080/lingpipe-demo/echo/response.xml"/>
-       <arg value="-inputFile=temp.txt"/>
-       <arg value="-outputFile=temp.out.txt"/>
+  <target name="models">
+    <mkdir dir="models"/>
+	<get src="http://alias-i.com/lingpipe/demos/models/pos-en-general-brown.HiddenMarkovModel" dest="models/pos-en-general-brown.HiddenMarkovModel"/>
+  	<!--<get src="http://www.timexportal.info/local\-\-files/wikiwars/WikiWars_20101004.zip" dest="models/wikiwars.zip" />-->
+	<get username="bgmartins" password="DaVinci" src="http://www.tycho.iel.unicamp.br/~tycho/corpus/texts/pos.zip" dest="models/pos.zip"/>
+    <java classname="temporal.TrainPOSTagger" fork="true">
+       <classpath refid="classpath.standard"/>
+       <arg value="models/pos.zip"/>
+       <arg value="models/pos-pt-general-TychoBrahe.HiddenMarkovModel"/>
     </java>
   </target>
 
-	<target name="war" depends="jar">
-	    <mkdir dir="war"/>
-	    <copy todir="war"><fileset dir="war"/></copy>
-	  	<mkdir dir="war/WEB-INF/lib"/>
-	    <copy todir="war/WEB-INF/lib">
-	      <fileset file="${app.name}.jar"/>
-	      <fileset file="/usr/share/java/lingpipe.jar"/>
-	      <fileset file="/usr/share/java/commons-fileupload.jar"/>
-	      <fileset file="/usr/share/java/commons-io.jar"/>
-	      <fileset file="/usr/share/java/nekohtml.jar"/>
-	      <fileset file="/usr/share/java/xml-apis.jar"/>
-	      <fileset file="/usr/share/java/weka.jar"/>
-	      <fileset file="/usr/share/java/ngramj.jar"/>
-	 	  <fileset file="/usr/share/java/xercesImpl.jar"/>
-	      <fileset file="/usr/share/java/joda-time-1.6.2.jar" />
-	    </copy>
-	    <jar destfile="war/WEB-INF/lib/models.jar">
-	      <fileset dir="." includes="models/timex.model.crf" />
-	      <fileset dir="." includes="models/pos-en-general-brown.HiddenMarkovModel" />
-	      <fileset dir="." includes="models/javascript-literals.xsl" />
-	      <fileset dir="." includes="models/xml-to-string.xsl" />
-	      <fileset dir="." includes="models/WordsList.lex" />
-	    </jar>
-		<jar destfile="war/WEB-INF/lib/regressionModel.jar">
-		<fileset dir="." includes="regressionModel/RegressionModel.svm" />
-		</jar>
-	    <jar destfile="${app.name}.war">
-	      <fileset dir="war"/>
-	    </jar>
-		<!--<delete dir="war"/>-->
-	  	<!--<delete dir="models"/>-->
-	  	<delete file="${app.name}.jar"/>
-	  </target>
+  <target name="client" depends="jar">
+    <java classname="temporal.web.TIMEXClient" fork="true">
+       <classpath refid="classpath.standard"/>
+       <arg value="-serverUrl=http://localhost:8080/timex-demo/timex/response.xml"/>
+       <arg value="-inputFile=temp.txt"/>
+       <arg value="-outputFile=temp.out.txt"/>
+    </java>
+	<delete file="${app.name}.jar"/>
+  </target>
+
+  <target name="war" depends="jar,models">
+    <mkdir dir="war"/>
+    <copy todir="war"><fileset dir="webapp"/></copy>
+  	<mkdir dir="war/WEB-INF/lib"/>
+    <copy todir="war/WEB-INF/lib">
+      <fileset file="${app.name}.jar"/>
+      <fileset file="/usr/share/java/lingpipe.jar"/>
+      <fileset file="/usr/share/java/commons-fileupload.jar"/>
+      <fileset file="/usr/share/java/commons-io.jar"/>
+      <fileset file="/usr/share/java/nekohtml.jar"/>
+      <fileset file="/usr/share/java/xml-apis.jar"/>
+      <fileset file="/usr/share/java/weka.jar"/>
+      <fileset file="/usr/share/java/joda-time.jar"/>
+      <fileset file="/usr/share/java/snowball.jar"/>
+      <fileset file="/usr/share/java/ngramj.jar"/>
+ 	  <fileset file="/usr/share/java/xercesImpl.jar"/>
+    </copy>
+    <jar destfile="war/WEB-INF/lib/models.jar">
+      <fileset dir="." includes="models/pos-en-general-brown.HiddenMarkovModel" />
+      <fileset dir="." includes="models/pos-pt-general-TychoBrahe.HiddenMarkovModel" />
+    </jar>
+    <jar destfile="${app.name}.war">
+      <fileset dir="war"/>
+    </jar>
+  	<delete dir="war"/>
+  	<!--<delete dir="models"/>-->
+  	<delete file="${app.name}.jar"/>
+  </target>
 
   <target name="deploy" depends="war">
-    <taskdef name="deploy" classname="org.apache.catalina.ant.DeployTask"/>
+    <taskdef name="deploy" classname="org.apache.catalina.ant.DeployTask">
+        <classpath>
+           <pathelement location="/usr/share/java/catalina-ant.jar"/>
+        </classpath>
+    </taskdef>
     <deploy url="${manager.url}" 
             username="${manager.username}" 
             password="${manager.password}" 
             path="/${app.name}" 
-            war="build/${app.name}.war"/>
+            war="${app.name}.war"/>
+	<delete file="${app.name}.war"/>
   </target>
 
   <target name="undeploy">
-    <taskdef name="undeploy" classname="org.apache.catalina.ant.UndeployTask"/>
+    <taskdef name="undeploy" classname="org.apache.catalina.ant.UndeployTask">
+        <classpath>
+           <pathelement location="/usr/share/java/catalina-ant.jar"/>
+        </classpath>
+    </taskdef>
     <undeploy url="${manager.url}" username="${manager.username}" password="${manager.password}" path="/${app.name}"/>
   </target>
 
