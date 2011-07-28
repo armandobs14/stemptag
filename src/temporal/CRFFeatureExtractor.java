@@ -52,13 +52,14 @@ public class CRFFeatureExtractor implements com.aliasi.crf.ChainCrfFeatureExtrac
 		if(hmmPos!=null && dictionaries) try {
 			//timeNames = readDictionary(new File(hmmPos + File.separator + "timeNames.lst"));
 			//timeNames = readDictionary(new File("/Users/vitorloureiro/Desktop/Geo-Temporal/timeNames.lst"));
-			  placeNames = readDictionary(new File("/Users/vitorloureiro/Desktop/Geo-Temporal/PlaceLexicon/lex-all-names.out"));
+			  placeNames = readDictionary(new File("/Users/vitorloureiro/Desktop/Geo-Temporal/PlaceLexicon/locationNames.lst"));
 			  personNames = readDictionary(new File("/Users/vitorloureiro/Desktop/Geo-Temporal/PlaceLexicon/person.lst")); 
 			  facilityNames = readDictionary(new File("/Users/vitorloureiro/Desktop/Geo-Temporal/PlaceLexicon/facility.lst"));
 			  companyNames = readDictionary(new File("/Users/vitorloureiro/Desktop/Geo-Temporal/PlaceLexicon/company.lst"));
 			  festivalNames = readDictionary(new File("/Users/vitorloureiro/Desktop/Geo-Temporal/PlaceLexicon/festival.lst"));
 			  titleNames = readDictionary(new File("/Users/vitorloureiro/Desktop/Geo-Temporal/PlaceLexicon/title.lst"));
 			  governmentNames = readDictionary(new File("/Users/vitorloureiro/Desktop/Geo-Temporal/PlaceLexicon/government.lst"));
+                          ambiguousTimeNames = readDictionary(new File("/Users/vitorloureiro/Desktop/Geo-Temporal/PlaceLexicon/ambiguousTimeNames.lst"));
 			  System.out.println("TamanhoPlaceNames: "+placeNames.size());
 			  System.out.println("TamanhoPlaceNames: "+personNames.size());
 			  System.out.println("TamanhoPlaceNames: "+facilityNames.size());
@@ -269,8 +270,10 @@ public class CRFFeatureExtractor implements com.aliasi.crf.ChainCrfFeatureExtrac
         
         public Map<String,? extends Number> edgeFeatures(int n, int k) {
             ObjectToDoubleMap<String> feats = new ObjectToDoubleMap<String>();
+            String prevToken = bos ? null : normedToken(n-1);
             feats.set("PREV_TAG_" + tag(k), 1.0);
             feats.set("PREV_TAG_TOKEN_CAT_"  + tag(k) + "_" + tokenCat(n-1), 1.0);
+            if (governmentNames.contains(prevToken.toLowerCase())) feats.set("PREV_TAG_TOKEN_CAT_"  + tag(k) + "_GNAMES", 1.0);
             return feats;
         }
         

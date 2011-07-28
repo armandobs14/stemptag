@@ -51,7 +51,7 @@
   <target name="models">
     <mkdir dir="models"/>
 	<get src="http://alias-i.com/lingpipe/demos/models/pos-en-general-brown.HiddenMarkovModel" dest="models/pos-en-general-brown.HiddenMarkovModel"/>
-  	<!--<get src="http://www.timexportal.info/local\-\-files/wikiwars/WikiWars_20101004.zip" dest="models/wikiwars.zip" />-->
+  	<get src="http://www.timexportal.info/local\-\-files/wikiwars/WikiWars_20101004.zip" dest="models/wikiwars.zip" />
 	<get username="bgmartins" password="DaVinci" src="http://www.tycho.iel.unicamp.br/~tycho/corpus/texts/pos.zip" dest="models/pos.zip"/>
     <java classname="temporal.TrainPOSTagger" fork="true">
        <classpath refid="classpath.standard"/>
