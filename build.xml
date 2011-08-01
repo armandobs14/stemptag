@@ -15,9 +15,9 @@
     <pathelement location="/usr/share/java/servlet-api.jar" />
     <pathelement location="/usr/share/java/weka.jar"/>
     <pathelement location="/usr/share/java/snowball.jar"/>
-  	<pathelement location="/usr/share/java/joda-time.jar"/>
-  	<pathelement location="/usr/share/java/ngramj.jar"/>
-  	<pathelement location="/usr/share/java/xml-apis.jar" />
+    <pathelement location="/usr/share/java/joda-time.jar"/>
+    <pathelement location="/usr/share/java/ngramj.jar"/>
+    <pathelement location="/usr/share/java/xml-apis.jar" />
     <pathelement location="/usr/share/java/xercesImpl.jar" />
     <pathelement location="/usr/share/java/lucene.jar" />
     <pathelement location="bin"/>
@@ -75,7 +75,7 @@
     <copy todir="war"><fileset dir="webapp"/></copy>
   	<mkdir dir="war/WEB-INF/lib"/>
     <copy todir="war/WEB-INF/lib">
-            <mkdir dir="war/WEB-INF/classes"/>
+        <mkdir dir="war/WEB-INF/classes"/>
     <mkdir dir="war/WEB-INF/classes/META-INF"/>
     <copy todir="war/WEB-INF/classes/META-INF" file="webapp/WEB-INF/jdoconfig.xml" />
   	<copy todir="war/WEB-INF/classes">
