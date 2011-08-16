@@ -1,3 +1,5 @@
+package geo;
+
 import static java.lang.Double.isNaN;
 import static java.lang.Math.PI;
 import static java.lang.Math.abs;

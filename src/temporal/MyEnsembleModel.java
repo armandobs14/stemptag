@@ -1,16 +1,17 @@
 package temporal;
 
-import weka.classifiers.*;
+import weka.classifiers.Classifier;
+import weka.classifiers.IteratedSingleClassifierEnhancer;
+import weka.classifiers.MultipleClassifiersCombiner;
+import weka.classifiers.SingleClassifierEnhancer;
 import weka.classifiers.meta.*;
 import weka.classifiers.trees.*;
 import weka.classifiers.rules.*;
 import weka.classifiers.functions.*;
-import weka.classifiers.bayes.*;
 import weka.core.Capabilities.Capability;
 import weka.core.*;
-import java.util.*;
 
-public class MyEnsembleModel extends AbstractClassifier {
+public class MyEnsembleModel extends Classifier {
 
   static final long serialVersionUID = 8934314652175299374L;
 
@@ -20,7 +21,6 @@ public class MyEnsembleModel extends AbstractClassifier {
 
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
-    result.disableAll();
     result.enable(Capability.NOMINAL_ATTRIBUTES);
     result.enable(Capability.NUMERIC_ATTRIBUTES);
     result.enable(Capability.DATE_ATTRIBUTES);
@@ -109,6 +109,8 @@ public class MyEnsembleModel extends AbstractClassifier {
 
   public void buildClassificationEnsemble(Instances data) throws Exception {
       // Random Forest
+      Classifier c00 = new Decorate();
+	  // Random Forest
       Classifier c01 = new RandomForest();
       ((RandomForest)c01).setNumTrees(500); 
       // Rotation Forest with REPTree
@@ -145,7 +147,7 @@ public class MyEnsembleModel extends AbstractClassifier {
       Classifier c13 = new REPTree();
       ((REPTree)c13).setNumFolds(10); 
       MultipleClassifiersCombiner c14 = new Vote();
-      c14.setClassifiers(new Classifier[]{c10,c11,c12,c13});
+      c14.setClassifiers(new Classifier[]{c00,c10,c11,c12,c13});
       EnsembleSelection emodel = new EnsembleSelection();
       emodel.setVerboseOutput(false);
       emodel.setHillclimbIterations(1000);
@@ -167,6 +169,8 @@ public class MyEnsembleModel extends AbstractClassifier {
   public double[] distributionForInstance(Instance instance) throws Exception {
 	return model.distributionForInstance(instance);
   }
+  
+  public String getRevision () { return "MyEnsembleModel"; }
 
   public static void main(String[] argv) { runClassifier(new MyEnsembleModel(), argv); }
 

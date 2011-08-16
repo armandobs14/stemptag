@@ -22,14 +22,12 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
-
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.joda.time.Period;
@@ -40,7 +38,6 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-
 import temporal.rules.TIMEXRuleAnnotator;
 import temporal.TIMEXMLAnnotator;
 import com.aliasi.chunk.BioTagChunkCodec;
@@ -65,7 +62,6 @@ import com.aliasi.tokenizer.IndoEuropeanTokenizerFactory;
 import com.aliasi.tokenizer.TokenizerFactory;
 import com.aliasi.util.AbstractExternalizable;
 import com.aliasi.xml.SimpleElementHandler;
-
 import weka.classifiers.Classifier;
 import weka.core.Instance;
 import weka.classifiers.functions.SVMreg;
@@ -206,7 +202,7 @@ public class TIMEXExperiment {
 				//Computes the document timestamp for each document
 				if(paragraphs.item(j).hasAttributes()){
 					CandidateCreation.docCreationTime = new DateTime(new String(paragraphs.item(j).getAttributes().item(0).getTextContent()));
-					System.out.println("Data criação documento: "+CandidateCreation.docCreationTime);
+					System.out.println("Data criaÔøΩÔøΩo documento: "+CandidateCreation.docCreationTime);
 				}
 				
 				CandidateCreation.candidatesMillisecondsSameSentence.clear();
@@ -674,7 +670,7 @@ public class TIMEXExperiment {
 		  CandidateCreation.numberCandidatesTimex = 0;
 	//	  trainResolver(new File(path+"/../timex-train.xml"),new File(path+"/../timex.model.crf"));
 		  String main[] = {path+"/../timex-train.xml"};
-		  System.out.println("A entrar na desambiguação");
+		  System.out.println("A entrar na desambiguaÔøΩÔøΩo");
 	//	  TIMEXRegressionDisambiguation.main(main);
 	//	  TIMEXRegressionDisambiguation.makeWordList("/Users/vitorloureiro/Desktop/Teste3/WikiWars_regression/01_WW2.key.xml");
 		  testResolver(new File(path+"/../../timex.model.crf"), "/Users/vitorloureiro/Desktop/Teste3/models/RegressionModel.svm", new File(path+"/../timex-train.xml"), evaluationCRF, annotationCRF);

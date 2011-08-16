@@ -3,16 +3,13 @@ package geo;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-
 import temporal.CandidateCreation;
 import weka.classifiers.Classifier;
-
 import com.aliasi.chunk.Chunk;
 import com.aliasi.chunk.Chunker;
 import com.aliasi.chunk.Chunking;
 import com.aliasi.chunk.ChunkingImpl;
 import com.vividsolutions.jts.geom.Point;
-
 import dmir.gis.CandidateGenerator;
 import dmir.gis.KbEntity;
 

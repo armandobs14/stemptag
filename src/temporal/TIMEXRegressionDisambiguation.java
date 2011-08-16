@@ -23,7 +23,6 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
-
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.w3c.dom.Document;
@@ -31,7 +30,6 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-
 import weka.classifiers.Classifier;
 import weka.core.Instance;
 import weka.classifiers.functions.SVMreg;
@@ -82,7 +80,7 @@ public class TIMEXRegressionDisambiguation {
 				//Tira o Timestamp do Documento
 				if(elemList.item(i).hasAttributes()){
 					CandidateCreation.docCreationTime = new DateTime(new String(elemList.item(i).getAttributes().item(0).getTextContent()));
-					System.out.println("Data criação documento: "+CandidateCreation.docCreationTime);
+					System.out.println("Data criaÔøΩÔøΩo documento: "+CandidateCreation.docCreationTime);
 				}
 					
 				//Limpa os arrays com os candidatos da mesma frase.
@@ -341,7 +339,7 @@ public class TIMEXRegressionDisambiguation {
 				while (it2.hasNext()){
 					if (it2.next().equals(s.replaceAll(",", "").toLowerCase())){
 						list.set(l, 1);
-						System.out.println("Posição da palavra "+s.replaceAll(",", "")+": "+l);
+						System.out.println("PosiÔøΩÔøΩo da palavra "+s.replaceAll(",", "")+": "+l);
 						break;
 					}
 					l++;	

@@ -12,23 +12,18 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
-
-import com.sun.corba.se.impl.orbutil.graph.Node;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.PrecisionModel;
-
-import dmir.gis.CandidateGenerator;
-import dmir.gis.KbEntity;
-
 import weka.classifiers.Classifier;
 import weka.core.Instance;
 import weka.classifiers.functions.SVMreg;
+import dmir.gis.CandidateGenerator;
+import dmir.gis.KbEntity;
 
 public class PLACERegressionDisambiguation {
 		
@@ -82,13 +77,13 @@ public class PLACERegressionDisambiguation {
 						continue;
 					}
 					
-					size = latLong.replaceAll("(°)|�", "").split(" ")[0].length();
-					CorrectlatAttribute = Double.parseDouble(latLong.replaceAll("(°)|�", "").split(" ")[0].substring(0, size-2));
+					size = latLong.replaceAll("(°)|�", "").split(" ")[0].length();
+					CorrectlatAttribute = Double.parseDouble(latLong.replaceAll("(°)|�", "").split(" ")[0].substring(0, size-2));
 	            	if (latLong.split(" ")[0].toLowerCase().contains("s"))
 	            		CorrectlatAttribute = CorrectlatAttribute*(-1);
 	            	
-	            	size = latLong.replaceAll("(°)|�", "").split(" ")[1].length();
-	            	CorrectlonAttribute = Double.parseDouble(latLong.replaceAll("(°)|�", "").split(" ")[1].substring(0, size-2));
+	            	size = latLong.replaceAll("(°)|�", "").split(" ")[1].length();
+	            	CorrectlonAttribute = Double.parseDouble(latLong.replaceAll("(°)|�", "").split(" ")[1].substring(0, size-2));
 	            	if (latLong.split(" ")[1].toLowerCase().contains("w"))
 	            		CorrectlonAttribute = CorrectlonAttribute*(-1);
 					

@@ -9,10 +9,8 @@ import com.aliasi.tokenizer.TokenizerFactory;
 import com.aliasi.xml.DelegatingHandler;
 import java.util.ArrayList;
 import java.util.List;
-
 import org.xml.sax.Attributes;
 import org.xml.sax.helpers.DefaultHandler;
-
 
 public class PLACEChunkParser extends XMLParser<ObjectHandler> {
 
@@ -97,15 +95,15 @@ public class PLACEChunkParser extends XMLParser<ObjectHandler> {
             mStart = mBuf.length();
             typeAttribute = attributes.getValue("type");
             if (attributes.getValue("latLong") != null){
-            	size = attributes.getValue("latLong").replaceAll("å¡", "").replaceAll("¡", "").split(" ")[0].length();
-            	latAttribute = Double.parseDouble(attributes.getValue("latLong").replaceAll("å¡", "").replaceAll("¡", "").split(" ")[0].substring(0, size-2));
-            	if (attributes.getValue("latLong").replaceAll("å¡", "").split(" ")[0].toLowerCase().contains("s"))
+            	size = attributes.getValue("latLong").replaceAll("ï¿½", "").replaceAll("ï¿½", "").split(" ")[0].length();
+            	latAttribute = Double.parseDouble(attributes.getValue("latLong").replaceAll("ï¿½", "").replaceAll("ï¿½", "").split(" ")[0].substring(0, size-2));
+            	if (attributes.getValue("latLong").replaceAll("ï¿½", "").split(" ")[0].toLowerCase().contains("s"))
             		latAttribute = latAttribute*(-1);
             	System.out.println("latitude: "+latAttribute);
             	
-            	size = attributes.getValue("latLong").replaceAll("å¡", "").replaceAll("¡", "").split(" ")[1].length();
-            	lonAttribute = Double.parseDouble(attributes.getValue("latLong").replaceAll("å¡", "").replaceAll("¡", "").split(" ")[1].substring(0, size-2));
-            	if (attributes.getValue("latLong").replaceAll("å¡", "").split(" ")[1].toLowerCase().contains("w"))
+            	size = attributes.getValue("latLong").replaceAll("ï¿½", "").replaceAll("ï¿½", "").split(" ")[1].length();
+            	lonAttribute = Double.parseDouble(attributes.getValue("latLong").replaceAll("ï¿½", "").replaceAll("ï¿½", "").split(" ")[1].substring(0, size-2));
+            	if (attributes.getValue("latLong").replaceAll("ï¿½", "").split(" ")[1].toLowerCase().contains("w"))
             		lonAttribute = lonAttribute*(-1);
             	System.out.println("longitude: "+lonAttribute);
             }

@@ -40,6 +40,7 @@ public class CRFFeatureExtractor implements com.aliasi.crf.ChainCrfFeatureExtrac
 	HashSet<String> festivalNames;
 	HashSet<String> titleNames;
 	HashSet<String> governmentNames;
+	HashSet<String> ambiguousTimeNames;
 	
     public CRFFeatureExtractor() throws ClassNotFoundException, IOException { hmmPOSModelFile = null; }
 
@@ -59,7 +60,7 @@ public class CRFFeatureExtractor implements com.aliasi.crf.ChainCrfFeatureExtrac
 			  festivalNames = readDictionary(new File("/Users/vitorloureiro/Desktop/Geo-Temporal/PlaceLexicon/festival.lst"));
 			  titleNames = readDictionary(new File("/Users/vitorloureiro/Desktop/Geo-Temporal/PlaceLexicon/title.lst"));
 			  governmentNames = readDictionary(new File("/Users/vitorloureiro/Desktop/Geo-Temporal/PlaceLexicon/government.lst"));
-                          ambiguousTimeNames = readDictionary(new File("/Users/vitorloureiro/Desktop/Geo-Temporal/PlaceLexicon/ambiguousTimeNames.lst"));
+              ambiguousTimeNames = readDictionary(new File("/Users/vitorloureiro/Desktop/Geo-Temporal/PlaceLexicon/ambiguousTimeNames.lst"));
 			  System.out.println("TamanhoPlaceNames: "+placeNames.size());
 			  System.out.println("TamanhoPlaceNames: "+personNames.size());
 			  System.out.println("TamanhoPlaceNames: "+facilityNames.size());
@@ -269,7 +270,9 @@ public class CRFFeatureExtractor implements com.aliasi.crf.ChainCrfFeatureExtrac
         }
         
         public Map<String,? extends Number> edgeFeatures(int n, int k) {
-            ObjectToDoubleMap<String> feats = new ObjectToDoubleMap<String>();
+            boolean bos = n == 0;
+            boolean eos = (n + 1) >= numTokens();
+        	ObjectToDoubleMap<String> feats = new ObjectToDoubleMap<String>();
             String prevToken = bos ? null : normedToken(n-1);
             feats.set("PREV_TAG_" + tag(k), 1.0);
             feats.set("PREV_TAG_TOKEN_CAT_"  + tag(k) + "_" + tokenCat(n-1), 1.0);

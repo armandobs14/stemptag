@@ -1,7 +1,6 @@
 package geo;
 
 import geo.PLACEChunkParser;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -24,14 +23,12 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
-
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.joda.time.Period;
@@ -42,7 +39,6 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-
 import temporal.rules.TIMEXRuleAnnotator;
 import temporal.CRFFeatureExtractor;
 import temporal.TIMEXMLAnnotator;
@@ -68,11 +64,9 @@ import com.aliasi.tokenizer.IndoEuropeanTokenizerFactory;
 import com.aliasi.tokenizer.TokenizerFactory;
 import com.aliasi.util.AbstractExternalizable;
 import com.aliasi.xml.SimpleElementHandler;
-
 import weka.classifiers.Classifier;
 import weka.core.Instance;
 import weka.classifiers.functions.SVMreg;
-
 import dmir.gis.CosineSimilarity;
 import dmir.gis.Main;
 
@@ -297,7 +291,7 @@ public class PLACEExperiment {
 		  PLACEConstants.candidatesPlaceSameDoc.clear();
 	//	  trainResolver(new File(path+"/../place-train.xml"),new File(path+"/../place.model.crf"));
 		  String main[] = {path+"/../place-train.xml"};
-	//	  System.out.println("A entrar na desambiguação");
+	//	  System.out.println("A entrar na desambiguaÔøΩÔøΩo");
 	//	  PLACERegressionDisambiguation.main(main);
 		  testResolver(new File(path+"/../place.model.crf"), "/Users/vitorloureiro/Desktop/Geo-Temporal/geoModels/RegressionPlaceModel.svm", new File(path+"/../place-test.xml"), evaluationCRF, annotationCRF);
 		  evaluationCRF.close(); 

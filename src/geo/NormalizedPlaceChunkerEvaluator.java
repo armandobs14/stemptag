@@ -1,14 +1,10 @@
 package geo;
 
 import com.aliasi.chunk.Chunker;
-import com.aliasi.chunk.ChunkerEvaluator;
 import com.aliasi.chunk.Chunking;
-import com.aliasi.chunk.ChunkingEvaluation;
-import com.aliasi.chunk.ChunkingImpl;
 import com.aliasi.corpus.ObjectHandler;
 
-public class NormalizedPlaceChunkerEvaluator implements com.aliasi.corpus.TagHandler, // PLEASE IGNORE DEPRECATION WARNING
-ObjectHandler<Chunking> { 
+public class NormalizedPlaceChunkerEvaluator implements ObjectHandler<Chunking> { 
 	
 	private Chunker mChunker;
 
@@ -49,12 +45,5 @@ ObjectHandler<Chunking> {
 	public NormalizedPlaceChunkingEvaluation evaluation() {
         return mChunkingEvaluation;
     }
-
-
-	@Override
-	public void handle(String[] toks, String[] whitespaces, String[] tags) {
-		// TODO Auto-generated method stub
-		
-	}
 
 }
