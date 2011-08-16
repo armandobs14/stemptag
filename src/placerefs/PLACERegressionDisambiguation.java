@@ -13,12 +13,11 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
-
 import placerefs.gazetteer.CandidateGenerator;
 import placerefs.gazetteer.KbEntity;
+import placerefs.gazetteer.VincentyDistanceCalculator;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Point;
@@ -118,8 +117,8 @@ public class PLACERegressionDisambiguation {
 	 	            	
 	 	            	Point p1 = new Point(new Coordinate(CorrectlonAttribute,CorrectlatAttribute), new PrecisionModel(),4326);
 	 	            	Point p2 = new Point(new Coordinate(Double.parseDouble(nextPlace.coordinates.split(" ")[1].replaceAll("N|E|S|W", "")),Double.parseDouble(nextPlace.coordinates.split(" ")[0].replaceAll("N|E|S|W", ""))), new PrecisionModel(),4326);
-
-	 	            	dataToPrint = dataToPrint+p1.distance(p2); 	            	
+	 	            	
+	 	            	dataToPrint = dataToPrint+VincentyDistanceCalculator.getDistance(p1,p2); 	            	
 	 	            	o.println(dataToPrint);
 	 	            	data.clear();
 	 	            	

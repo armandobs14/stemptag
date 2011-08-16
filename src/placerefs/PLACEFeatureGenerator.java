@@ -1,12 +1,10 @@
 package placerefs;
 
-
 import java.util.ArrayList;
-
 import placerefs.gazetteer.ConcaveHullBuilder;
 import placerefs.gazetteer.CosineSimilarity;
 import placerefs.gazetteer.KbEntity;
-
+import placerefs.gazetteer.VincentyDistanceCalculator;
 import com.aliasi.spell.EditDistance;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
@@ -26,11 +24,9 @@ public class PLACEFeatureGenerator {
 		return new GeometryFactory().createMultiPoint(points.toArray(new Point[0])).convexHull().getArea();	
 	}
 	
-	public static double getAngleBetweenPoints(Point point1, Point point2) throws Exception{
-		
-		return point1.distance(point2);
+	public static double getDistanceBetweenPoints(Point point1, Point point2) throws Exception {
+		return VincentyDistanceCalculator.getDistance(point1,point2);
 	}
-	
 	
 	@SuppressWarnings("deprecation")
 	public static ArrayList<String> featuresGenerator(KbEntity candidate, String phraseText, String placeText) throws Exception{

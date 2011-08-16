@@ -13,6 +13,7 @@ import static java.lang.Math.toDegrees;
 import static java.lang.Math.toRadians;
 import static java.lang.Math.round;
 import java.text.NumberFormat;
+import com.vividsolutions.jts.geom.Point;
 
 /**
  * A geographic data calculator based on Vincenty's formulae.
@@ -51,6 +52,14 @@ import java.text.NumberFormat;
  */
 public class VincentyDistanceCalculator {
 
+	public static double getDistance ( Point p1, Point p2 ) {
+		double lat1 = p1.getY();
+		double lat2 = p2.getY();
+		double lon1 = p1.getX();
+		double lon2 = p2.getX();
+		return getDistance(lat1,lon1,lat2,lon2);
+	}
+	
 	// Returns the distance in kilometers
 	public static double getDistance ( double lat1, double lon1, double lat2, double lon2 ) {
 		VincentyDistanceCalculator dist = new VincentyDistanceCalculator();
