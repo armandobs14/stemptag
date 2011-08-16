@@ -1,4 +1,4 @@
-package geo;
+package placerefs;
 
 import java.io.File;
 import java.io.FileReader;
@@ -16,14 +16,16 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
+
+import placerefs.gazetteer.CandidateGenerator;
+import placerefs.gazetteer.KbEntity;
+
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.PrecisionModel;
 import weka.classifiers.Classifier;
 import weka.core.Instance;
 import weka.classifiers.functions.SVMreg;
-import dmir.gis.CandidateGenerator;
-import dmir.gis.KbEntity;
 
 public class PLACERegressionDisambiguation {
 		
@@ -142,7 +144,7 @@ public class PLACERegressionDisambiguation {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static KbEntity disambiguate ( String place, String phraseText, ArrayList<KbEntity> candidates , Classifier model ) {
+	public static KbEntity disambiguate ( String place, String phraseText, List<KbEntity> candidates , Classifier model ) {
 		double maxScore = Double.MAX_VALUE;
 		KbEntity bestCandidate = null;
 		ArrayList<String> features;	

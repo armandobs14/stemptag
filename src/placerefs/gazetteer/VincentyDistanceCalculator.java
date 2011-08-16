@@ -1,4 +1,4 @@
-package geo;
+package placerefs.gazetteer;
 
 import static java.lang.Double.isNaN;
 import static java.lang.Math.PI;

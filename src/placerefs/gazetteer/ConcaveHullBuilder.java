@@ -1,4 +1,4 @@
-package geo;
+package placerefs.gazetteer;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;

@@ -1,6 +1,5 @@
 package temporal;
 
-import geo.PLACEChunkParser;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -38,6 +37,8 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+
+import placerefs.PLACEChunkParser;
 import temporal.rules.TIMEXRuleAnnotator;
 import temporal.TIMEXMLAnnotator;
 import com.aliasi.chunk.BioTagChunkCodec;

@@ -1,7 +1,8 @@
-package geo;
+package placerefs;
 
 import java.util.HashSet;
-import dmir.gis.KbEntity;
+
+import placerefs.gazetteer.KbEntity;
 
 public class PLACEConstants {
 

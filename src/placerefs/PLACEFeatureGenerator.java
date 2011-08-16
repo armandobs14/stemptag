@@ -1,13 +1,17 @@
-package geo;
+package placerefs;
+
 
 import java.util.ArrayList;
+
+import placerefs.gazetteer.ConcaveHullBuilder;
+import placerefs.gazetteer.CosineSimilarity;
+import placerefs.gazetteer.KbEntity;
+
 import com.aliasi.spell.EditDistance;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.PrecisionModel;
-import dmir.gis.CosineSimilarity;
-import dmir.gis.KbEntity;
 
 public class PLACEFeatureGenerator {
 	

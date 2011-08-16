@@ -1,6 +1,5 @@
-package geo;
+package placerefs;
 
-import geo.PLACEChunkParser;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -8,45 +7,20 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
-import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.GregorianCalendar;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Locale;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.TreeSet;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpression;
-import javax.xml.xpath.XPathExpressionException;
-import org.joda.time.DateTime;
-import org.joda.time.Interval;
-import org.joda.time.Period;
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.xml.sax.Attributes;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
+
+import placerefs.PLACEChunkParser;
 import temporal.rules.TIMEXRuleAnnotator;
 import temporal.CRFFeatureExtractor;
-import temporal.TIMEXMLAnnotator;
 import com.aliasi.chunk.BioTagChunkCodec;
 import com.aliasi.chunk.CharLmHmmChunker;
 import com.aliasi.chunk.Chunk;
-import com.aliasi.chunk.ChunkAndCharSeq;
-import com.aliasi.chunk.ChunkFactory;
 import com.aliasi.chunk.Chunker;
 import com.aliasi.chunk.ChunkerEvaluator;
 import com.aliasi.chunk.TagChunkCodec;
@@ -63,12 +37,7 @@ import com.aliasi.stats.RegressionPrior;
 import com.aliasi.tokenizer.IndoEuropeanTokenizerFactory;
 import com.aliasi.tokenizer.TokenizerFactory;
 import com.aliasi.util.AbstractExternalizable;
-import com.aliasi.xml.SimpleElementHandler;
 import weka.classifiers.Classifier;
-import weka.core.Instance;
-import weka.classifiers.functions.SVMreg;
-import dmir.gis.CosineSimilarity;
-import dmir.gis.Main;
 
 public class PLACEExperiment {
 

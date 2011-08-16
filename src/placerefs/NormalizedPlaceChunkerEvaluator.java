@@ -1,4 +1,4 @@
-package geo;
+package placerefs;
 
 import com.aliasi.chunk.Chunker;
 import com.aliasi.chunk.Chunking;

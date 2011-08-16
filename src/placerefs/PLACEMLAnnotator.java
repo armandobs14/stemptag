@@ -1,8 +1,11 @@
-package geo;
+package placerefs;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+
+import placerefs.gazetteer.CandidateGenerator;
+import placerefs.gazetteer.KbEntity;
 import temporal.CandidateCreation;
 import weka.classifiers.Classifier;
 import com.aliasi.chunk.Chunk;
@@ -10,8 +13,6 @@ import com.aliasi.chunk.Chunker;
 import com.aliasi.chunk.Chunking;
 import com.aliasi.chunk.ChunkingImpl;
 import com.vividsolutions.jts.geom.Point;
-import dmir.gis.CandidateGenerator;
-import dmir.gis.KbEntity;
 
 public class PLACEMLAnnotator implements Chunker{
 	
@@ -31,7 +32,7 @@ public class PLACEMLAnnotator implements Chunker{
 	@Override
 	public Chunking chunk(char[] cs, int start, int end) {
 		String s = new String(cs,start,end);
-		ArrayList<KbEntity> candidatos = new ArrayList<KbEntity>();
+		List<KbEntity> candidatos = new ArrayList<KbEntity>();
 		KbEntity bestCandidate;
 		ChunkingImpl chunks = new ChunkingImpl(s);
  	    Chunking chunking = chunker.chunk(cs,start,end);
