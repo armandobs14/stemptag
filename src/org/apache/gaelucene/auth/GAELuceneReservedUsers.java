@@ -22,9 +22,7 @@ public class GAELuceneReservedUsers {
       reader = new BufferedReader(new InputStreamReader(new FileInputStream(gaeluceneUsersFile), "UTF-8"));
       for (String line = reader.readLine(); line != null; line = reader.readLine()) {
         line = line.trim();
-        if (line.startsWith("#")) {
-          continue;
-        }
+        if (line.startsWith("#")) { continue; }
         reservedUsers.add(line.toLowerCase());
       }
     } catch (IOException ioe) {
@@ -41,7 +39,8 @@ public class GAELuceneReservedUsers {
   public static boolean isReservedUser(String userEmail) {
     if (userEmail == null) { return false; }
     userEmail = userEmail.toLowerCase();
-    return reservedUsers.contains(userEmail);
+    return true;
+    //TODO: return reservedUsers.contains(userEmail);
   }
 
   public static List<String> getReservedUsers() {

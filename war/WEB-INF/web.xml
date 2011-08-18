@@ -134,5 +134,15 @@
   <servlet-name>TimexML</servlet-name>
   <url-pattern>/timex-ml/*</url-pattern> 
  </servlet-mapping>
+ 
+ <!-- Management of Lucene indexes -->
+ <servlet>
+  <servlet-name>GAELuceneAdminServlet</servlet-name>
+  <servlet-class>org.apache.gaelucene.dashboard.GAELuceneAdminServlet</servlet-class>
+ </servlet>
+ <servlet-mapping>
+  <servlet-name>GAELuceneAdminServlet</servlet-name>
+  <url-pattern>/gaelucenedashboard/*</url-pattern>
+ </servlet-mapping>
 
 </web-app>

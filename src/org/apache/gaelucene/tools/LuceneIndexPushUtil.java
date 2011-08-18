@@ -21,7 +21,6 @@ import org.apache.lucene.store.GAEFile;
 
 public class LuceneIndexPushUtil {
 
-//private static final String GAE_APP_URL = "http://stemptag.appspot.com/dashboard/gaelucene"; 
   private static final String GAE_APP_URL = "http://localhost:8080/gaelucenedashboard";
 
   private static boolean commitFile(File file, String category, long version, int fi) throws IOException {
@@ -186,8 +185,7 @@ public class LuceneIndexPushUtil {
         jobRecFileName = args[++i];
       }
     }
-    if (gaeAppURL == null || authCookie == null || sourceDirName == null || category == null
-        || jobRecFileName == null) {
+    if (gaeAppURL == null || authCookie == null || sourceDirName == null || category == null || jobRecFileName == null) {
       System.err.println(USAGE);
       System.exit(-1);
     }

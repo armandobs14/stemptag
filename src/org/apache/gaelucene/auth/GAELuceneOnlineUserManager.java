@@ -10,8 +10,7 @@ public class GAELuceneOnlineUserManager {
 
   private static GAELuceneOnlineUserManager instance = new GAELuceneOnlineUserManager();
 
-  private GAELuceneOnlineUserManager() {
-  }
+  private GAELuceneOnlineUserManager() { }
 
   public static GAELuceneOnlineUserManager getInstance() {
     return instance;

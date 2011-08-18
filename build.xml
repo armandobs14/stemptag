@@ -168,5 +168,47 @@
 		      <args><arg value="logs.txt"/></args>
 		    </appcfg>
   </target>
+	
+  <target name="luceneindex" description="Creates and deploys the lucene index for the gazetteer">
+	<java classname="org.apache.gaelucene.tools.LuceneIndexPushUtil">
+        <classpath refid="classpath.standard"/>
+  	    <arg value="-app-url" />
+	    <arg value="http://stemptag.appspot.com/gaelucenedashboard" />
+  	    <arg value="-auth-cookie" />
+	    <arg value="ahlogincookie=${appengine.username}:false:12093021971246851751" />
+  	    <arg value="-src" />
+	    <arg value="data/lucene/kb-names" />
+  	    <arg value="-cat" />
+	    <arg value="data/lucene/kb-names" />
+	    <arg value="-rec-file" />
+  	    <arg value="data/lucene/uploaded.rec" />
+  	 </java>
+ 	 <java classname="org.apache.gaelucene.tools.LuceneIndexPushUtil">
+        <classpath refid="classpath.standard"/>
+  	    <arg value="-app-url" />
+	    <arg value="http://stemptag.appspot.com/gaelucenedashboard" />
+  	    <arg value="-auth-cookie" />
+	    <arg value="ahlogincookie=${appengine.username}:false:12093021971246851751" />
+  	    <arg value="-src" />
+	    <arg value="data/lucene/kb-content" />
+  	    <arg value="-cat" />
+	    <arg value="data/lucene/kb-content" />
+	    <arg value="-rec-file" />
+  	    <arg value="data/lucene/uploaded.rec" />
+  	 </java>  	
+	 <java classname="org.apache.gaelucene.tools.LuceneIndexPushUtil">
+        <classpath refid="classpath.standard"/>
+  	    <arg value="-app-url" />
+	    <arg value="http://stemptag.appspot.com/gaelucenedashboard" />
+  	    <arg value="-auth-cookie" />
+	    <arg value="ahlogincookie=${appengine.username}:false:12093021971246851751" />
+  	    <arg value="-src" />
+	    <arg value="data/lucene/kb-spell" />
+  	    <arg value="-cat" />
+	    <arg value="data/lucene/kb-spell" />
+	    <arg value="-rec-file" />
+  	    <arg value="data/lucene/uploaded.rec" />
+  	 </java>
+  </target>
   
 </project>

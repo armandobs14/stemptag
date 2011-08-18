@@ -1,6 +1,6 @@
 package placerefs.gazetteer;
 
-public class KbEntity {
+public class GazetteerEntry {
     
     public String id = null;
 

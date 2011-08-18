@@ -5,7 +5,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import placerefs.gazetteer.CandidateGenerator;
-import placerefs.gazetteer.KbEntity;
+import placerefs.gazetteer.GazetteerEntry;
 import temporal.CandidateCreation;
 import weka.classifiers.Classifier;
 import com.aliasi.chunk.Chunk;
@@ -32,8 +32,8 @@ public class PLACEMLAnnotator implements Chunker{
 	@Override
 	public Chunking chunk(char[] cs, int start, int end) {
 		String s = new String(cs,start,end);
-		List<KbEntity> candidatos = new ArrayList<KbEntity>();
-		KbEntity bestCandidate;
+		List<GazetteerEntry> candidatos = new ArrayList<GazetteerEntry>();
+		GazetteerEntry bestCandidate;
 		ChunkingImpl chunks = new ChunkingImpl(s);
  	    Chunking chunking = chunker.chunk(cs,start,end);
  	    for ( Chunk chunk : chunking.chunkSet()) {

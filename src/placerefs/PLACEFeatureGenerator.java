@@ -3,7 +3,7 @@ package placerefs;
 import java.util.ArrayList;
 import placerefs.gazetteer.ConcaveHullBuilder;
 import placerefs.gazetteer.CosineSimilarity;
-import placerefs.gazetteer.KbEntity;
+import placerefs.gazetteer.GazetteerEntry;
 import placerefs.gazetteer.VincentyDistanceCalculator;
 import com.aliasi.spell.EditDistance;
 import com.vividsolutions.jts.geom.Coordinate;
@@ -29,7 +29,7 @@ public class PLACEFeatureGenerator {
 	}
 	
 	@SuppressWarnings("deprecation")
-	public static ArrayList<String> featuresGenerator(KbEntity candidate, String phraseText, String placeText) throws Exception{
+	public static ArrayList<String> featuresGenerator(GazetteerEntry candidate, String phraseText, String placeText) throws Exception{
 		
 		ArrayList<String> arrayFeatures = new ArrayList<String>();
 		double maxValue = Double.MAX_VALUE;
@@ -65,7 +65,7 @@ public class PLACEFeatureGenerator {
 		arrayFeatures.add(String.valueOf(candidate.wiki_text.split(" ").length));
 		
 		//Feature 4
-		for (KbEntity e : PLACEConstants.candidatesPlaceSameDoc){
+		for (GazetteerEntry e : PLACEConstants.candidatesPlaceSameDoc){
 			Point p1 = new Point(new Coordinate(longCandidate,latCandidate), new PrecisionModel(),4326);
 			Point p2 = new Point(new Coordinate(Double.parseDouble(e.coordinates.split(" ")[1].replaceAll("N|E|S|W", "")),Double.parseDouble(e.coordinates.split(" ")[0].replaceAll("N|E|S|W", ""))), new PrecisionModel(),4326);
 			if (p1.distance(p2) < maxValue)
@@ -74,7 +74,7 @@ public class PLACEFeatureGenerator {
 		arrayFeatures.add(String.valueOf(maxValue));
 		
 		//Feature 5
-		for (KbEntity e : PLACEConstants.candidatesPlaceSameDoc){
+		for (GazetteerEntry e : PLACEConstants.candidatesPlaceSameDoc){
 			Point p1 = new Point(new Coordinate(longCandidate,latCandidate), new PrecisionModel(),4326);
 			Point p2 = new Point(new Coordinate(Double.parseDouble(e.coordinates.split(" ")[1].replaceAll("N|E|S|W", "")),Double.parseDouble(e.coordinates.split(" ")[0].replaceAll("N|E|S|W", ""))), new PrecisionModel(),4326);
 			somaDistancias = somaDistancias + p1.distance(p2);
@@ -85,7 +85,7 @@ public class PLACEFeatureGenerator {
 			arrayFeatures.add(String.valueOf(somaDistancias/PLACEConstants.candidatesPlaceSameDoc.size()));
 		
 		//Feature 6
-		for (KbEntity e : PLACEConstants.candidatesPlaceSameDoc){
+		for (GazetteerEntry e : PLACEConstants.candidatesPlaceSameDoc){
 			list.add(new Point(new Coordinate(Double.parseDouble(e.coordinates.split(" ")[1].replaceAll("N|E|S|W", "")),Double.parseDouble(e.coordinates.split(" ")[0].replaceAll("N|E|S|W", ""))), new PrecisionModel(),4326));
 		}
 		arrayFeatures.add(String.valueOf(new GeometryFactory().createMultiPoint(list.toArray(new	Point[0])).convexHull().getArea()));

@@ -80,7 +80,7 @@ public class KbParser {
         } 
     }
 
-    public void indexEntity (KbEntity entity) {
+    public void indexEntity (GazetteerEntry entity) {
         if (entity == null) return;        
         try {
             Document doc = new Document();
@@ -162,7 +162,7 @@ public class KbParser {
         
     	private StringBuffer accumulator = new StringBuffer();
         
-    	private KbEntity entity = null;
+    	private GazetteerEntry entity = null;
 
         private String c = "\\-?\\d{1,3}[^\\s\\w=]\\d+[^\\s\\w=]?(\\d+(\\.\\d+)?[^\\s\\w=]?)?[NSns]?" +
                            "((\\s+|\\s*,)\\s*)" +
@@ -208,7 +208,7 @@ public class KbParser {
                 lons = null;
                 lonew = null;
                 coordinate = null;
-                entity = new KbEntity();
+                entity = new GazetteerEntry();
                 entity.wiki_title = attributes.getValue("wiki_title");
                 entity.id = attributes.getValue("id");
                 entity.name = attributes.getValue("name");
@@ -376,8 +376,8 @@ public class KbParser {
         }
         String toponym = "Lisbon";
         CandidateGenerator cg = new CandidateGenerator();
-        List<KbEntity> candidates = cg.getCandidates(toponym);
-        for (KbEntity c : candidates) {
+        List<GazetteerEntry> candidates = cg.getCandidates(toponym);
+        for (GazetteerEntry c : candidates) {
             System.out.println(c.name);
         }        
         EditDistance levenshtein = new EditDistance(true);

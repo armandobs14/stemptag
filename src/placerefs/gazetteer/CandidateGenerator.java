@@ -48,10 +48,10 @@ public class CandidateGenerator {
         }
     }
 
-    public List<KbEntity> getCandidates(String toponym) throws Exception {
+    public List<GazetteerEntry> getCandidates(String toponym) throws Exception {
         List<SuggestWord> candidates = spellChecker.suggestSimilar(QueryParser.escape(toponym), Configurator.MAX_NAME_SUGGESTIONS);
         Set<String> antiDuplicates = new HashSet<String>();
-        List<KbEntity> result = new ArrayList<KbEntity>();
+        List<GazetteerEntry> result = new ArrayList<GazetteerEntry>();
         for (SuggestWord candidate : candidates) {
             if (antiDuplicates.contains(candidate.eid)) {
                 continue;
@@ -61,7 +61,7 @@ public class CandidateGenerator {
             Query query = completeQueryParser.parse(candidate.eid);                         
             ScoreDoc[] hits = completeSearcher.search(query, 1).scoreDocs;
             Document d = completeSearcher.doc(hits[0].doc);
-            KbEntity c = new KbEntity();
+            GazetteerEntry c = new GazetteerEntry();
             c.id = d.get("eid");
             c.name = d.get("name");
             c.wiki_title = d.get("wiki_title");

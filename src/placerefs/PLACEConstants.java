@@ -2,11 +2,11 @@ package placerefs;
 
 import java.util.HashSet;
 
-import placerefs.gazetteer.KbEntity;
+import placerefs.gazetteer.GazetteerEntry;
 
 public class PLACEConstants {
 
-	public static HashSet<KbEntity> candidatesPlaceSameDoc = new HashSet<KbEntity>();
+	public static HashSet<GazetteerEntry> candidatesPlaceSameDoc = new HashSet<GazetteerEntry>();
 
 	public static boolean isFirstPlace;
 

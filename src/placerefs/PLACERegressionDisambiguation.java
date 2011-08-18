@@ -16,7 +16,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import placerefs.gazetteer.CandidateGenerator;
-import placerefs.gazetteer.KbEntity;
+import placerefs.gazetteer.GazetteerEntry;
 import placerefs.gazetteer.VincentyDistanceCalculator;
 
 import com.vividsolutions.jts.geom.Coordinate;
@@ -43,8 +43,8 @@ public class PLACERegressionDisambiguation {
 			double CorrectlatAttribute;
 	        double CorrectlonAttribute;
 	        int size;
-			List<KbEntity> candidatos = new ArrayList<KbEntity>();
-			ArrayList<KbEntity> candidatosDestePlace = new ArrayList<KbEntity>();
+			List<GazetteerEntry> candidatos = new ArrayList<GazetteerEntry>();
+			ArrayList<GazetteerEntry> candidatosDestePlace = new ArrayList<GazetteerEntry>();
 			ArrayList<String> features;
 			ArrayList<String> data = new ArrayList<String>();;
 			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -91,8 +91,8 @@ public class PLACERegressionDisambiguation {
 					//Computes each candidate of the place expression
 	                CandidateGenerator cg = new CandidateGenerator();
 	                candidatos = cg.getCandidates(placeText);
-					Iterator<KbEntity> it = candidatos.iterator();
-					KbEntity nextPlace;
+					Iterator<GazetteerEntry> it = candidatos.iterator();
+					GazetteerEntry nextPlace;
 					
 					//Computes for each candidate its features
 					while(it.hasNext()) {
@@ -125,7 +125,7 @@ public class PLACERegressionDisambiguation {
 	 	            }
 					
 					//Actualiza a lista de candidatos anteriores com os candidatos gerados pelo corrente place
-					for (KbEntity e : candidatosDestePlace){
+					for (GazetteerEntry e : candidatosDestePlace){
 						PLACEConstants.candidatesPlaceSameDoc.add(e); 
 					}
 					
@@ -143,16 +143,16 @@ public class PLACERegressionDisambiguation {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static KbEntity disambiguate ( String place, String phraseText, List<KbEntity> candidates , Classifier model ) {
+	public static GazetteerEntry disambiguate ( String place, String phraseText, List<GazetteerEntry> candidates , Classifier model ) {
 		double maxScore = Double.MAX_VALUE;
-		KbEntity bestCandidate = null;
+		GazetteerEntry bestCandidate = null;
 		ArrayList<String> features;	
-        KbEntity candidatePlace;
-        ArrayList<KbEntity> candidatosDestePlace = new ArrayList<KbEntity>();
+        GazetteerEntry candidatePlace;
+        ArrayList<GazetteerEntry> candidatosDestePlace = new ArrayList<GazetteerEntry>();
         
         try {
 	
-			Iterator<KbEntity> it = candidates.iterator();
+			Iterator<GazetteerEntry> it = candidates.iterator();
 
 			// repeat steps below for each candidate disambiguation
 	            while(it.hasNext()) {
@@ -189,7 +189,7 @@ public class PLACERegressionDisambiguation {
 	            	
 	            }
 	            
-	            for (KbEntity e : candidatosDestePlace){
+	            for (GazetteerEntry e : candidatosDestePlace){
 					PLACEConstants.candidatesPlaceSameDoc.add(e); 
 				}
 				
