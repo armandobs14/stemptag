@@ -30,7 +30,7 @@ import org.xml.sax.helpers.DefaultHandler;
 
 import com.aliasi.spell.EditDistance;
 
-public class KbParser {
+public class GazetteerParser {
 
     private IndexWriter namesWriter = null;
     
@@ -371,7 +371,7 @@ public class KbParser {
 
 
         if (Configurator.INDEX) {
-            KbParser kbp = new KbParser();
+            GazetteerParser kbp = new GazetteerParser();
             kbp.indexKb();
         }
         String toponym = "Lisbon";
