@@ -1,14 +1,11 @@
 package placerefs.gazetteer;
 
-
-/**
- * Contains the constants that allow an easy reconfiguration of the program's parameters.
- * 
- * @author ivo
- */
 public final class Configurator {
 
     private Configurator() { }
+    
+    /** A Boolean indicating if the indexes are stored over Google App Engine */
+    public static final Boolean APP_ENGINE = true;
     
     /** DBPedia file containing redirect information. **/
     public static final String DBPEDIA_REDIRECTS = "/Volumes/300Extra/dbpedia/redirects_en.nt";
@@ -34,4 +31,5 @@ public final class Configurator {
     public static final int MAX_NAME_SUGGESTIONS = 30;
 
     public static final boolean INDEX = false;
+
 }

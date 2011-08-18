@@ -20,6 +20,7 @@
     <pathelement location="/usr/share/java/xml-apis.jar" />
     <pathelement location="/usr/share/java/xercesImpl.jar" />
     <pathelement location="/usr/share/java/lucene.jar" />
+    <pathelement location="/usr/share/java/jts.jar" />
     <pathelement location="bin"/>
     <fileset dir="${appengine.sdk.dir}/lib"><include name="shared/**/*.jar" /></fileset>
 	<pathelement location="${appengine.sdk.dir}/lib/appengine-tools-api.jar" />
@@ -93,6 +94,8 @@
       <fileset file="/usr/share/java/snowball.jar"/>
       <fileset file="/usr/share/java/ngramj.jar"/>
  	  <fileset file="/usr/share/java/xercesImpl.jar"/>
+      <fileset file="/usr/share/java/lucene.jar"/>
+      <fileset file="/usr/share/java/jts.jar"/>
     </copy>
     <jar destfile="war/WEB-INF/lib/models.jar">
       <fileset dir="." includes="models/pos-en-general-brown.HiddenMarkovModel" />
@@ -166,5 +169,4 @@
 		    </appcfg>
   </target>
   
-
 </project>

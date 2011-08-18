@@ -20,106 +20,55 @@ import org.apache.lucene.store.AlreadyClosedException;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.search.spell.Dictionary;
 
-
-/**
- * <p>
- *   Spell Checker class  (Main class) <br/>
- *  (initially inspired by the David Spencer code).
- * </p>
- *
- * <p>Example Usage:
- * 
- * <pre>
- *  SpellChecker spellchecker = new SpellChecker(spellIndexDirectory);
- *  // To index a field of a user index:
- *  spellchecker.indexDictionary(new LuceneDictionary(my_lucene_reader, a_field));
- *  // To index a file containing words:
- *  spellchecker.indexDictionary(new PlainTextDictionary(new File("myfile.txt")));
- *  String[] suggestions = spellchecker.suggestSimilar("misspelt", 5);
- * </pre>
- * 
- *
- * @version 1.0
- */
 public class SpellChecker implements java.io.Closeable {
 
-  /**
-   * Field name for each word in the ngram index.
-   */
   public static final String F_WORD = "word";
+
   public static final String F_ID = "eid";
   
   private static final Term F_WORD_TERM = new Term(F_WORD);
 
-  /**
-   * the spell index
-   */
-  // don't modify the directory directly - see #swapSearcher()
-  // TODO: why is this package private?
   Directory spellIndex;
 
-  /**
-   * Boost value for start and end grams
-   */
   private float bStart = 2.0f;
+
   private float bEnd = 1.0f;
 
-  // don't use this searcher directly - see #swapSearcher()
   private IndexSearcher searcher;
   
-  /*
-   * this locks all modifications to the current searcher. 
-   */
   private final Object searcherLock = new Object();
   
-  /*
-   * this lock synchronizes all possible modifications to the 
-   * current index directory. It should not be possible to try modifying
-   * the same index concurrently. Note: Do not acquire the searcher lock
-   * before acquiring this lock! 
-   */
   private final Object modifyCurrentIndexLock = new Object();
+
   private volatile boolean closed = false;
   
   private String wField;
+  
   private String idField;
 
-  /**
-   * Use the given directory as a spell checker index. The directory
-   * is created if it doesn't exist yet.
-   * @param spellIndex the spell index directory
-   * @param sd the {@link StringDistance} measurement to use 
-   * @throws IOException if Spellchecker can not open the directory
-   */
+  public SpellChecker(IndexSearcher spellIndex, String wField, String idField) throws IOException {
+	    this.wField = wField;
+	    this.idField = idField;
+	    this.spellIndex = null;
+	    this.searcher = spellIndex;
+  }
+
   public SpellChecker(Directory spellIndex, String wField, String idField) throws IOException {
     setSpellIndex(spellIndex);
     this.wField = wField;
     this.idField = idField;
   }
   
-  /**
-   * Use a different index as the spell checker index or re-open
-   * the existing index if <code>spellIndex</code> is the same value
-   * as given in the constructor.
-   * @param spellIndexDir the spell directory to use
-   * @throws AlreadyClosedException if the Spellchecker is already closed
-   * @throws  IOException if spellchecker can not open the directory
-   */
-  // TODO: we should make this final as it is called in the constructor
   public void setSpellIndex(Directory spellIndexDir) throws IOException {
-    // this could be the same directory as the current spellIndex
-    // modifications to the directory should be synchronized 
     synchronized (modifyCurrentIndexLock) {
       ensureOpen();
       if (!IndexReader.indexExists(spellIndexDir)) {
-          IndexWriter writer = new IndexWriter(spellIndexDir, null, true,
-              IndexWriter.MaxFieldLength.UNLIMITED);
+          IndexWriter writer = new IndexWriter(spellIndexDir, null, true, IndexWriter.MaxFieldLength.UNLIMITED);
           writer.close();
       }
       swapSearcher(spellIndexDir);
     }
   }
-
 
   /**
    * Suggest similar words.
@@ -164,31 +113,20 @@ public class SpellChecker implements java.io.Closeable {
    * first criteria: the edit distance, second criteria (only if restricted mode): the popularity
    * of the suggest words in the field of the user index
    */
-  public List<SuggestWord> suggestSimilar(String word, int numSug, IndexReader ir,
-      String field) throws IOException {
-    // obtainSearcher calls ensureOpen
+  public List<SuggestWord> suggestSimilar(String word, int numSug, IndexReader ir, String field) throws IOException {
     final IndexSearcher indexSearcher = obtainSearcher();
     try{
       word = word.toLowerCase();
-      final int lengthWord = word.length();
-  
+      final int lengthWord = word.length();  
       BooleanQuery query = new BooleanQuery();
       String[] grams;
       String key;
-  
       for (int ng = getMin(lengthWord); ng <= getMax(lengthWord); ng++) {
-  
-        key = "gram" + ng; // form key
-  
-        grams = formGrams(word, ng); // form word into ngrams (allow dups too)
-  
-        if (grams.length == 0) {
-          continue; // hmm
-        }
-  
-        if (bStart > 0) { // should we boost prefixes?
-          add(query, "start" + ng, grams[0], bStart); // matches start of word
-  
+        key = "gram" + ng;  
+        grams = formGrams(word, ng);  
+        if (grams.length == 0) continue;
+        if (bStart > 0) {
+          add(query, "start" + ng, grams[0], bStart); // matches start of word  
         }
         if (bEnd > 0) { // should we boost suffixes
           add(query, "end" + ng, grams[grams.length - 1], bEnd); // matches end of word
@@ -198,11 +136,8 @@ public class SpellChecker implements java.io.Closeable {
           add(query, key, grams[i]);
         }
       }
-      
       ScoreDoc[] hits = indexSearcher.search(query, null, numSug).scoreDocs;
       List<SuggestWord> suggestions = new ArrayList<SuggestWord>();
-      
-      
       for (int i = 0; i < hits.length; i++) {
         ScoreDoc hit = hits[i];
         Document doc = indexSearcher.doc(hit.doc);
@@ -210,10 +145,8 @@ public class SpellChecker implements java.io.Closeable {
         sugWord.string = doc.get(F_WORD); // get orig word
         sugWord.eid = doc.get(F_ID); // get the orig id
         sugWord.score = hit.score;//sd.getDistance(word, sugWord.string);
-   
         suggestions.add(sugWord);
       }
-  
       return suggestions;
     } finally {
       releaseSearcher(indexSearcher);
@@ -245,9 +178,7 @@ public class SpellChecker implements java.io.Closeable {
   private static String[] formGrams(String text, int ng) {
     int len = text.length();
     String[] res = new String[len - ng + 1];
-    for (int i = 0; i < len - ng + 1; i++) {
-      res[i] = text.substring(i, i + ng);
-    }
+    for (int i = 0; i < len - ng + 1; i++) res[i] = text.substring(i, i + ng);
     return res;
   }
 
@@ -274,7 +205,6 @@ public class SpellChecker implements java.io.Closeable {
    * @return true if the word exists in the index
    */
   public boolean exist(String word) throws IOException {
-    // obtainSearcher calls ensureOpen
     final IndexSearcher indexSearcher = obtainSearcher();
     try{
       return indexSearcher.docFreq(F_WORD_TERM.createTerm(word)) > 0;
@@ -295,33 +225,21 @@ public class SpellChecker implements java.io.Closeable {
     synchronized (modifyCurrentIndexLock) {
       ensureOpen();
       final Directory dir = this.spellIndex;
-      final IndexWriter writer = new IndexWriter(dir, new WhitespaceAnalyzer(),
-          IndexWriter.MaxFieldLength.UNLIMITED);
+      final IndexWriter writer = new IndexWriter(dir, new WhitespaceAnalyzer(), IndexWriter.MaxFieldLength.UNLIMITED);
       writer.setMergeFactor(mergeFactor);
       writer.setRAMBufferSizeMB(ramMB);
-  
       Iterator<Document> iter = dict.getWordsIterator();
       while (iter.hasNext()) {
         Document baseDoc = iter.next();
         String word = baseDoc.get(wField);
-        String id = baseDoc.get(idField);
-  
+        String id = baseDoc.get(idField);  
         int len = word.length();
-        if (len < 2) {
-          continue; // too short we bail but "too long" is fine...
-        }
-        
-        
-  
-        // ok index the word
+        if (len < 2) continue;
         Document doc = createDocument(word.toLowerCase(), id, getMin(len), getMax(len));
         writer.addDocument(doc);
       }
-      // close writer
       writer.optimize();
       writer.close();
-      // also re-open the spell index to see our own changes when the next suggestion
-      // is fetched:
       swapSearcher(dir);
     }
   }
@@ -393,8 +311,6 @@ public class SpellChecker implements java.io.Closeable {
   }
   
   private void releaseSearcher(final IndexSearcher aSearcher) throws IOException{
-      // don't check if open - always decRef 
-      // don't decrement the private searcher - could have been swapped
       aSearcher.getIndexReader().decRef();      
   }
   
@@ -413,29 +329,19 @@ public class SpellChecker implements java.io.Closeable {
     synchronized (searcherLock) {
       ensureOpen();
       closed = true;
-      if (searcher != null) {
-        searcher.close();
-      }
+      if (searcher != null) searcher.close();
       searcher = null;
     }
   }
   
   private void swapSearcher(final Directory dir) throws IOException {
-    /*
-     * opening a searcher is possibly very expensive.
-     * We rather close it again if the Spellchecker was closed during
-     * this operation than block access to the current searcher while opening.
-     */
     final IndexSearcher indexSearcher = createSearcher(dir);
     synchronized (searcherLock) {
-      if(closed){
+      if( closed ){
         indexSearcher.close();
         throw new AlreadyClosedException("Spellchecker has been closed");
       }
-      if (searcher != null) {
-        searcher.close();
-      }
-      // set the spellindex in the sync block - ensure consistency.
+      if (searcher != null) { searcher.close(); }
       searcher = indexSearcher;
       this.spellIndex = dir;
     }
@@ -447,20 +353,10 @@ public class SpellChecker implements java.io.Closeable {
    * @return a new read-only IndexSearcher
    * @throws IOException f there is a low-level IO error
    */
-  // for testing purposes
   IndexSearcher createSearcher(final Directory dir) throws IOException{
     return new IndexSearcher(dir, true);
   }
   
-  /**
-   * Returns <code>true</code> if and only if the {@link SpellChecker} is
-   * closed, otherwise <code>false</code>.
-   * 
-   * @return <code>true</code> if and only if the {@link SpellChecker} is
-   *         closed, otherwise <code>false</code>.
-   */
-  boolean isClosed(){
-    return closed;
-  }
+  boolean isClosed() { return closed; }
   
 }

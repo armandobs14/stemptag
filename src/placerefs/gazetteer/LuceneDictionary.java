@@ -5,12 +5,6 @@ import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.search.spell.Dictionary;
 import java.util.Iterator;
 
-/**
- * Lucene Dictionary: terms taken from the given field of a Lucene index.
- *
- * When using IndexReader.terms(Term) the code must not call next() on TermEnum
- * as the first call to TermEnum, see: http://issues.apache.org/jira/browse/LUCENE-6
- */
 public class LuceneDictionary implements Dictionary {
 
   private IndexReader reader;
@@ -23,18 +17,13 @@ public class LuceneDictionary implements Dictionary {
     return new LuceneIterator();
   }
 
-
-  /**
-   * 
-   * Returns an iterator for all documents in a lucene index.
-   * 
-   * @author ivo
-   *
-   */
   final class LuceneIterator implements Iterator<Document> {
-    private boolean hasNextCalled = false;
-    private int i = -1;
-    private int max;
+
+	private boolean hasNextCalled = false;
+    
+	private int i = -1;
+    
+	private int max;
 
     LuceneIterator() {
         max = reader.maxDoc();
@@ -60,7 +49,6 @@ public class LuceneDictionary implements Dictionary {
                 i++;
             } while(i < max && reader.isDeleted(i));
         }
-        
         return i < max;
     }
 

@@ -47,7 +47,6 @@
  <filter-name>XSLTFilter</filter-name>
  <url-pattern>*.xml</url-pattern>
 </filter-mapping>-->
-    
 
 <!-- Models -->
 
