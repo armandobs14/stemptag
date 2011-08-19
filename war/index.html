@@ -5,13 +5,13 @@
  <title>TIMEX Resolution Demo</title>
  <meta content="application/xhtml+xml; charset=UTF-8" http-equiv="Content-type" />
  <style type="text/css">
-  * { margin: 0; padding: 0; font-family: verdana, arial, sans-serif; background-color: #DDD; border: none; font-size: 1em; }
-  #header {background-color: #272651; padding: 0; color: #272651; margin: 0 0 1px 0; border: 15px solid #DDD; border-top: 1em solid #DDD; border-left: 1.15em solid #DDD; border-bottom: 1px solid #DDD; }
-  h1#pageTitle { font-size: 1.5em; color: #EEE; background-color: #272651; padding: 0.75em 0 .75em .333em; }
-  a#logo { float: right; display: inline; padding: 1em 1em 0 0; background-color: #272651; }
+  * { margin: 0; padding: 0; font-family: verdana, arial, sans-serif; background-color: #d1c5ca; border: none; font-size: 1em; }
+  #header {background-color: #471c2d; padding: 0; color: #471c2d; margin: 0 0 1px 0; border: 15px solid #d1c5ca; border-top: 1em solid #d1c5ca; border-left: 1.15em solid #d1c5ca; border-bottom: 1px solid #d1c5ca; }
+  h1#pageTitle { font-size: 1.5em; color: #EEE; background-color: #471c2d; padding: 0.75em 0 .75em .333em; }
+  a#logo { float: right; display: inline; padding: 1em 1em 0 0; background-color: #471c2d; }
   h2 { font-size: 1em; }
-  h2#poweredBy { float: right; font-size: 0.8em; font-weight: normal; background-color: #272651; color: #EEE; margin: 0; padding: 1em 1.5em; border: 15px solid #DDD; border-top: none }
-  h2#poweredBy a { font-size: 1.5em; font-weight: normal; background-color: #272651; color: #F7EB00; }
+  h2#poweredBy { float: right; font-size: 0.8em; font-weight: normal; background-color: #471c2d; color: #EEE; margin: 0; padding: 1em 1.5em; border: 15px solid #d1c5ca; border-top: none }
+  h2#poweredBy a { font-size: 1.5em; font-weight: normal; background-color: #471c2d; color: #F7EB00; }
   h3 { font-size: 1em; margin: 1.0em; }
   h4 { font-size: 0.8em; margin: .25em 0; }
   #description p { width: 100%; margin-bottom: 0.25em; padding: 0.5em; background-color: #EEE; border: 1px solid #888; font-size: 0.75em;  overflow:hidden }
@@ -61,7 +61,7 @@
  <div id="info">
   <p><b>See also:</b> Please visit our <a href="http://code.google.com/p/stemptag/">Google Code page</a> for more information.</p>
  </div>
- <form name="demo_form" action="/timex/response.xml" method="post">
+ <form id="demo_form" name="demo_form" action="/timex/response.xml" method="post">
   <div id="license"><p><b>Terms of Use:</b> This demo is for evaluation purposes only. Please do not overload our server. <a href="http://dmir.inesc-id.pt/">Contact the DMIR group of INESC-ID</a> about other uses.</p></div>
   <div id="input">
   <h4>Document Creation Time</h4>
@@ -456,5 +456,19 @@ Cut-and-paste or enter text in the specified character encoding. Alternatively, 
 </ul><h3>For more info: <a href="https://fenix.ist.utl.pt/homepage/ist159097">Contact the developer, Vitor Loureiro</a>.</h3>
 </div>
 </div>
+<script>
+  var mydate=new Date();
+  var theyear=mydate.getYear();
+  if (theyear < 1000) theyear+=1900;
+  var theday=mydate.getDay();
+  var themonth=mydate.getMonth()+1;
+  if (themonth<10) themonth="0"+themonth;
+  var theday=mydate.getDate();
+  if (theday<10) theday="0"+theday;
+  var displayfirst=theyear;
+  var displaysecond=themonth;
+  var displaythird=theday;
+  document.demo_form.docCreationTime.value=displayfirst+"-"+displaysecond+"-"+displaythird;
+</script>
 </body>
 </html>
