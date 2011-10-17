@@ -1,13 +1,9 @@
 package temporal;
 
 import org.joda.time.*;
-import org.joda.time.DateMidnight.Property;
 
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
-import java.util.TreeSet;
 
 public class CandidateCreation {
 	
@@ -16,7 +12,6 @@ public class CandidateCreation {
 	private static HashMap<String,Integer> days = new HashMap<String,Integer>();
 	private static HashMap<String,Integer> ordinals = new HashMap<String,Integer>();
 	public static DateTime docCreationTime;
-	//public static ArrayList<Interval> previousAnchor = new ArrayList<Interval>();
 	public static ArrayList<Long> candidatesMillisecondsSameDoc = new ArrayList<Long>();
 	public static ArrayList<Interval> candidatesIntervalsSameDoc = new ArrayList<Interval>();
 	public static ArrayList<Long> candidatesMillisecondsSameSentence = new ArrayList<Long>();
@@ -30,13 +25,6 @@ public class CandidateCreation {
 	public static boolean docCreationTimePlainText;
 	public static int granularityDuration;//9->Vague
 	public static int past_future_present_null_ref;//4->past 5->present  6->future 7->null 1->Recurrences
-	public static int count_expressions_rec; //->para eliminar depois de fazer
-	public static int count_expressions_present;
-	public static int count_expressions_past;
-	public static int count_expressions_future;
-	public static int count_expressions_misc;
-	public static int count_point;
-	public static int count_duration;
 	
 	public static void init(){
 		
@@ -49,13 +37,6 @@ public class CandidateCreation {
 		docCreationTimePlainText = false;
 		granularityDuration = 0;
 		past_future_present_null_ref = 0;
-		count_expressions_rec = 0;
-		count_expressions_present =0;
-		count_expressions_past=0;
-		count_expressions_future=0;
-		count_expressions_misc=0;
-		count_point=0;
-		count_duration=0;
 		
 		months.put("january",1);
     	months.put("february",2);
@@ -140,6 +121,7 @@ public class CandidateCreation {
 		ordinals.put("tenth", 10);		
 		
     }
+    
 	    
 	// Strings to compose complex dates
 	private static String fullyear = "1[0-9]{3}|20[0-5][0-9]";
@@ -248,8 +230,6 @@ public class CandidateCreation {
 			if (split.length == 3){
 				if(split[1].equals("following") || split[1].equals("next")){
 					if (split[2].toLowerCase().matches(longdays)){						
-					//	date = date.dayOfMonth().setCopy(diaMes-diaSemana+weekDays.get(split[2].toLowerCase())+7);
-					//	date = date.plusDays(diaMes-diaSemana+weekDays.get(split[2].toLowerCase())+6);
 						if (diaSemana < weekDays.get(split[2].toLowerCase())){
 							date = date.minusDays(diaSemana);
 							date = date.plusDays(weekDays.get(split[2].toLowerCase()));
@@ -260,31 +240,21 @@ public class CandidateCreation {
 							date = date.plusDays(7);
 						}
 						return date.dayOfMonth().toInterval();
-					//	return new Interval(new DateTime(date.toString("YYYY-MM-dd'T'00:00:00.000")), new DateTime(date.toString("YYYY-MM-dd'T'23:59:59.999")));
-					//	return date.toString("YYYY-MM-dd");	
 					}
 					else if (split[2].toLowerCase().matches(calendar_granularity)){
 						if (split[2].toLowerCase().matches("day")){
 							date = date.plusDays(1);
 							date = new DateTime(date.getYear(), date.getMonthOfYear(), date.getDayOfMonth(), 0, 0, 0, 0);
 							return date.dayOfMonth().toInterval();
-						//	return new Interval(new DateTime(date.toString("YYYY-MM-dd'T'00:00:00.000")), new DateTime(date.toString("YYYY-MM-dd'T'23:59:59.999")));
-							//return date.toString("YYYY-MM-dd");
 						}
 						else if (split[2].toLowerCase().matches("hour")){
 							date = date.plusHours(1);
 							date = new DateTime(date.getYear(), date.getMonthOfYear(), date.getDayOfMonth(), date.getHourOfDay(), 0, 0, 0);
-							//return new Interval(new DateTime(date.toString("YYYY-MM-dd'T'hh:00:00.000")), new DateTime(date.toString("YYYY-MM-dd'T'hh:59:59.999")));
 							return date.hourOfDay().toInterval();
-						//	return date.toString("YYYY-MM-dd'T'hh");
 						}
-						else if (split[2].toLowerCase().matches("week")){
-						//	date = date.dayOfMonth().setCopy(diaMes-diaSemana+8);
-							
+						else if (split[2].toLowerCase().matches("week")){	
 							date = date.plusDays(diaMes-diaSemana+7);
-							//return new Interval(new DateTime(date.toString("YYYY-MM-dd'T'00:00:00.000")), new DateTime(date.toString("YYYY-MM-dd'T'23:59:59.999")));
 							return date.weekOfWeekyear().toInterval();
-							//return date.toString("YYYY-MM-dd");
 						}
 						else if (split[2].toLowerCase().matches("weekend")){
 							if (diaSemana == 6 || diaSemana == 7){
@@ -296,30 +266,19 @@ public class CandidateCreation {
 								date = date.plusDays(6);
 							}
 							int dia = date.getDayOfMonth()+2;
-						//	date = date.dayOfMonth().setCopy(diaMes-diaSemana+6);
 							return new Interval(new DateTime(date.toString("YYYY-MM-dd'T'00:00:00.000")), new DateTime(date.toString("YYYY-MM-"+dia+"'T'00:00:00.000")));
-							//return date.toString("YYYY-MM-dd");
 						}
 						else if (split[2].toLowerCase().matches("month")){
-						//	date = new DateTime(numeroAno, mesAno+1, 1, 0, 0, 0, 0);
 							date = date.plusMonths(1);
-							//return new Interval(new DateTime(date.toString("YYYY-MM-01'T'00:00:00.000")), new DateTime(date.toString("YYYY-MM-30'T'23:59:59.999")));
 							return date.monthOfYear().toInterval();
-							//return date.toString("YYYY-MM");
 						}
 						else if (split[2].toLowerCase().matches("year")){
-						//	date = new DateTime(numeroAno+1, 1, 1, 0, 0, 0, 0);
-						//	return new Interval(new DateTime(date.toString("YYYY-01-01'T'00:00:00.000")), new DateTime(date.toString("YYYY-12-31'T'23:59:59.999")));
 							date = date.plusYears(1);
 							return date.year().toInterval();
-							//	return date.toString("YYYY");
 						}
 						else if (split[2].toLowerCase().matches("minute")){
-						//	date = new DateTime(numeroAno, mesAno, diaMes, date.getHourOfDay(), date.getMinuteOfHour()+1, 0, 0);
-						//	return new Interval(new DateTime(date.toString("YYYY-MM-dd'T'hh:mm:00.000")), new DateTime(date.toString("YYYY-MM-dd'T'hh:mm:59.999")));
 							date = date.plusMinutes(1);
 							return date.minuteOfHour().toInterval();
-							//	return date.toString("YYYY-MM-dd'T'hh:mm");
 						}
 						else if (split[2].toLowerCase().matches("seconds?")){
 							date = new DateTime(1970, 1, 1, 0, 0, 0, 0).plusMillis(1);
@@ -384,7 +343,6 @@ public class CandidateCreation {
 				}
 				else if (split[1].equals("last") || split[1].equals("previous")){
 					if (split[2].toLowerCase().matches(longdays)){
-					//	date = date.dayOfMonth().setCopy(diaMes-diaSemana+weekDays.get(split[2].toLowerCase())-7);
 						if (diaSemana > weekDays.get(split[2].toLowerCase())){
 							date = date.minusDays(diaSemana);
 							date = date.plusDays(weekDays.get(split[2].toLowerCase()));
@@ -394,24 +352,16 @@ public class CandidateCreation {
 							date = date.plusDays(weekDays.get(split[2].toLowerCase()));
 							date = date.minusDays(7);
 						}
-						//	return new Interval(new DateTime(date.toString("YYYY-MM-dd'T'00:00:00.000")), new DateTime(date.toString("YYYY-MM-dd'T'23:59:59.999")));
 						return date.dayOfMonth().toInterval();
-						//	return date.toString("YYYY-MM-dd");
 					}
 					else if (split[2].toLowerCase().matches(calendar_granularity)){
 						if (split[2].toLowerCase().matches("day")){
-						//	date = new DateTime(numeroAno, mesAno, diaMes-1, 0, 0, 0, 0);
 							date = date.minusDays(1);
 							return date.dayOfMonth().toInterval();
-						//	return new Interval(new DateTime(date.toString("YYYY-MM-dd'T'00:00:00.000")), new DateTime(date.toString("YYYY-MM-dd'T'23:59:59.999")));
-						//	return date.toString("YYYY-MM-dd");
 						}
 						else if (split[2].toLowerCase().matches("hour")){
-							//date = new DateTime(numeroAno, mesAno, diaMes, date.getHourOfDay()-1, 0, 0, 0);
 							date = date.minusHours(1);
 							return date.hourOfDay().toInterval();
-						//	return new Interval(new DateTime(date.toString("YYYY-MM-dd'T'hh:00:00.000")), new DateTime(date.toString("YYYY-MM-dd'T'hh:59:59.999")));
-						//	return date.toString("YYYY-MM-dd'T'hh");
 						}
 						else if (split[2].toLowerCase().matches("week")){
 							if (diaSemana == 6 || diaSemana == 7){
@@ -421,36 +371,23 @@ public class CandidateCreation {
 								date = date.minusDays(diaSemana-1);
 								date = date.minusDays(7);
 							}
-							//date = date.dayOfMonth().setCopy(diaMes-diaSemana-6);
 							return new Interval(new DateTime(date.toString("YYYY-MM-dd'T'00:00:00.000")), new DateTime(date.plusDays(5).toString("YYYY-MM-dd'T'00:00:00.000")));
-						//	return date.toString("YYYY-MM-dd");
 						}
 						else if (split[2].toLowerCase().matches("weekend")){
-						//	date = date.dayOfMonth().setCopy(diaMes-diaSemana-8);
 							date = date.minusDays(diaSemana+1);
 							return new Interval(new DateTime(date.toString("YYYY-MM-dd'T'00:00:00.000")), new DateTime(date.plusDays(2).toString("YYYY-MM-dd'T'00:00:00.000")));
-						//	return date.toString("YYYY-MM-dd");
 						}
 						else if (split[2].toLowerCase().matches("month")){
-						//	date = new DateTime(numeroAno, mesAno-1, 1, 0, 0, 0, 0);
 							date = date.minusMonths(1);
 							return date.monthOfYear().toInterval();
-						//	return new Interval(new DateTime(date.toString("YYYY-MM-01'T'00:00:00.000")), new DateTime(date.toString("YYYY-MM-30'T'23:59:59.999")));
-						//	return date.toString("YYYY-MM");
 						}
 						else if (split[2].toLowerCase().matches("year")){
-						//	date = new DateTime(numeroAno-1, 1, 1, 0, 0, 0, 0);
 							date = date.minusYears(1);
 							return date.year().toInterval();
-						//	return new Interval(new DateTime(date.toString("YYYY-01-01'T'00:00:00.000")), new DateTime(date.toString("YYYY-12-31'T'23:59:59.999")));
-						//	return date.toString("YYYY");
 						}
 						else if (split[2].toLowerCase().matches("minute")){
-						//	date = new DateTime(numeroAno, mesAno, diaMes, date.getHourOfDay(), date.getMinuteOfHour()+1, 0, 0);
 							date = date.minusMinutes(1);
 							return date.minuteOfHour().toInterval();
-						//	return new Interval(new DateTime(date.toString("YYYY-MM-dd'T'hh:mm:00.000")), new DateTime(date.toString("YYYY-MM-dd'T'hh:mm:59.999")));
-						//	return date.toString("YYYY-MM-dd'T'hh:mm");
 						}
 						else if (split[2].toLowerCase().matches("seconds?")){
 							date = new DateTime(1970, 1, 1, 0, 0, 0, 0).plusMillis(1);
@@ -520,48 +457,31 @@ public class CandidateCreation {
 							date = date.plusDays(weekDays.get(split[2].toLowerCase()));
 							date = date.minusDays(7);
 						}
-						//	return new Interval(new DateTime(date.toString("YYYY-MM-dd'T'00:00:00.000")), new DateTime(date.toString("YYYY-MM-dd'T'23:59:59.999")));
 						return date.dayOfMonth().toInterval();
-	    			//	return date.toString("YYYY-MM-dd");
 	    			}
 	    			else if (split[2].toLowerCase().matches(calendar_granularity)){
 						if (split[2].toLowerCase().matches("day")){
 							return date.dayOfMonth().toInterval();
-						//	return new Interval(new DateTime(date.toString("YYYY-MM-dd'T'00:00:00.000")), new DateTime(date.toString("YYYY-MM-dd'T'23:59:59.999")));
-						//	return date.toString("YYYY-MM-dd");
 						}
 						else if (split[2].toLowerCase().matches("hour")){
 							return date.hourOfDay().toInterval();
-						//	return new Interval(new DateTime(date.toString("YYYY-MM-dd'T'hh:00:00.000")), new DateTime(date.toString("YYYY-MM-dd'T'hh:59:59.999")));
-						//	return date.toString("YYYY-MM-dd'T'hh");
 						}
 						else if (split[2].toLowerCase().matches("week")){
-						//	date = date.dayOfMonth().setCopy(diaMes-diaSemana+1);
 							date = date.minusDays(diaSemana-1);
 							return new Interval(new DateTime(date.toString("YYYY-MM-dd'T'00:00:00.000")), new DateTime(date.plusDays(5).toString("YYYY-MM-dd'T'00:00:00.000")));
-						//	return date.toString("YYYY-MM-dd");
 						}
 						else if (split[2].toLowerCase().matches("weekend")){
-						//	date = date.dayOfMonth().setCopy(diaMes-diaSemana+6);
 							date = date.minusDays(diaSemana+1);
 							return new Interval(new DateTime(date.toString("YYYY-MM-dd'T'00:00:00.000")), new DateTime(date.plusDays(2).toString("YYYY-MM-dd'T'00:00:00.000")));
-						//	return new Interval(new DateTime(date.toString("YYYY-MM-dd'T'00:00:00.000")), new DateTime(date.plusDays(2).toString("YYYY-MM-dd'T'23:59:59.999")));
-						//	return date.toString("YYYY-MM-dd");
 						}
 						else if (split[2].toLowerCase().matches("month")){
 							return date.monthOfYear().toInterval();
-						//	return new Interval(new DateTime(date.toString("YYYY-MM-01'T'00:00:00.000")), new DateTime(date.toString("YYYY-MM-30'T'23:59:59.999")));
-						//	return date.toString("YYYY-MM");
 						}
 						else if (split[2].toLowerCase().matches("year")){
 							return date.year().toInterval();
-						//	return new Interval(new DateTime(date.toString("YYYY-01-01'T'00:00:00.000")), new DateTime(date.toString("YYYY-12-31'T'23:59:59.999")));
-						//	return date.toString("YYYY");
 						}
 						else if (split[2].toLowerCase().matches("minute")){
 							return date.minuteOfHour().toInterval();
-						//	return new Interval(new DateTime(date.toString("YYYY-MM-dd'T'hh:mm:00.000")), new DateTime(date.toString("YYYY-MM-dd'T'hh:mm:59.999")));
-						//	return date.toString("YYYY-MM-dd'T'hh:mm");
 						}
 						else {
 							System.out.println("ERRO!! Expressï¿½o nï¿½o reconhecida: "+timeEx);
@@ -720,46 +640,26 @@ public class CandidateCreation {
 						}
 	    				
 	    				return date.dayOfMonth().toInterval();
-	    			//	date = date.dayOfMonth().setCopy(diaMes-diaSemana+weekDays.get(split[1].toLowerCase()));
-	    			//	return new Interval(new DateTime(date.toString("YYYY-MM-dd'T'00:00:00.000")), new DateTime(date.toString("YYYY-MM-dd'T'23:59:59.999")));
-	    			//	return date.toString("YYYY-MM-dd");
 	    			}
 	    			else if (split[1].toLowerCase().matches(calendar_granularity)){
 	    				if (split[1].toLowerCase().matches("minutes?")){
 	    					return date.minuteOfHour().toInterval();
-	    				//	date = new DateTime(numeroAno, mesAno, diaMes, date.getHourOfDay(), date.getMinuteOfHour(), 0, 0);
-	    				//	return new Interval(new DateTime(date.toString("YYYY-MM-dd'T'hh:mm:00.000")), new DateTime(date.toString("YYYY-MM-dd'T'hh:mm:59.999")));
-	    				//	return date.toString("YYYY-MM-dd'T'hh:mm"); 
 	    				}
 	    				else if (split[1].toLowerCase().matches("hours?")){
 	    					return date.hourOfDay().toInterval();
-	    				//	date = new DateTime(numeroAno, mesAno, diaMes, date.getHourOfDay(), 0, 0, 0);
-	    				//	return new Interval(new DateTime(date.toString("YYYY-MM-dd'T'hh:00:00.000")), new DateTime(date.toString("YYYY-MM-dd'T'hh:59:59.999")));
-	    				//	return date.toString("YYYY-MM-dd'T'hh"); 
 	    				}
 	    				else if (split[1].toLowerCase().matches("days?")){
-	    					return date.dayOfMonth().toInterval();
-	    				//	date = new DateTime(numeroAno, mesAno, diaMes, 0, 0, 0, 0);
-	    				//	return new Interval(new DateTime(date.toString("YYYY-MM-dd'T'00:00:00.000")), new DateTime(date.toString("YYYY-MM-dd'T'23:59:59.999")));
-	    				//	return date.toString("YYYY-MM-dd"); 
+	    					return date.dayOfMonth().toInterval(); 
 	    				}
 	    				else if (split[1].toLowerCase().matches("months?")){
 	    					return date.monthOfYear().toInterval();
-	    				//	date = new DateTime(numeroAno, mesAno, 0, 0, 0, 0, 0);
-	    				//	return new Interval(new DateTime(date.toString("YYYY-MM-01'T'00:00:00.000")), new DateTime(date.toString("YYYY-MM-30'T'23:59:59.999")));
-	    				//	return date.toString("YYYY-MM"); 
 	    				}
 	    				else if (split[1].toLowerCase().matches("years?")){
 	    					return date.year().toInterval();
-	    				//	date = new DateTime(numeroAno, 0, 0, 0, 0, 0, 0);
-	    				//	return new Interval(new DateTime(date.toString("YYYY-01-01'T'00:00:00.000")), new DateTime(date.toString("YYYY-12-31'T'23:59:59.999")));
-	    				//	return date.toString("YYYY");
 	    				}
 	    				else if (split[1].toLowerCase().matches("weekend")){
 	    					date = date.minusDays(diaSemana);
 	    					date = date.plusDays(6);
-	    				//	date = date.dayOfMonth().setCopy(diaMes-diaSemana+6);
-	    				//	System.out.println(diaSemana);
 							return new Interval(new DateTime(date.toString("YYYY-MM-dd'T'00:00:00.000")), new DateTime(date.plusDays(2).toString("YYYY-MM-dd'T'00:00:00.000")));
 	    				}
 	    				else {
@@ -1714,14 +1614,10 @@ public class CandidateCreation {
 				else if (split[2].toLowerCase().matches(monthspec)){
 					date = new DateTime(numeroAno, months.get(split[2].toLowerCase()), 1, 0, 0, 0, 0);
 					return date.monthOfYear().toInterval();
-				//	return new Interval(new DateTime(date.toString("YYYY-MM-01'T'00:00:00.000")), new DateTime(date.toString("YYYY-MM-30'T'23:59:59.999")));
-				//	return date.toString("YYYY-MM");
 				}
 				else if (split[2].toLowerCase().matches(fullyear)){
 					date = new DateTime(Integer.parseInt(split[2]), 1, 1, 0, 0, 0, 0);
 					return date.year().toInterval();
-				//	return new Interval(new DateTime(date.toString("YYYY-01-01'T'00:00:00.000")), new DateTime(date.toString("YYYY-12-31'T'23:59:59.999")));
-				//	return date.toString("YYYY");
 				}
 				else {
 					System.out.println("ERRO!! Expressï¿½o nï¿½o reconhecida: "+timeEx);
@@ -1740,21 +1636,15 @@ public class CandidateCreation {
 			if (split[1].toLowerCase().matches(monthspec)){
 				date = new DateTime(numeroAno, months.get(split[1].toLowerCase()), 1, 0, 0, 0, 0);
 				return date.monthOfYear().toInterval();
-			//	return new Interval(new DateTime(date.toString("YYYY-MM-01'T'00:00:00.000")), new DateTime(date.toString("YYYY-MM-30'T'23:59:59.999")));
-			//	return date.toString("YYYY-MM"); 
 			}
 			else if (split[1].toLowerCase().matches(calendar_granularity)){
 				if (split[1].toLowerCase().matches("months?")){
 					date = new DateTime(numeroAno, mesAno, 0, 0, 0, 0, 0);
 					return date.monthOfYear().toInterval();
-				//	return new Interval(new DateTime(date.toString("YYYY-MM-01'T'00:00:00.000")), new DateTime(date.toString("YYYY-MM-30'T'23:59:59.999")));
-				//	return date.toString("YYYY-MM"); 
 				}
 				else if (split[1].toLowerCase().matches("years?")){
 					date = new DateTime(numeroAno, 0, 0, 0, 0, 0, 0);
 					return date.year().toInterval();
-				//	return new Interval(new DateTime(date.toString("YYYY-01-01'T'00:00:00.000")), new DateTime(date.toString("YYYY-12-31'T'23:59:59.999")));
-				//	return date.toString("YYYY");
 				}
 				else {
 					System.out.println("ERRO!! Expressï¿½o nï¿½o reconhecida: "+timeEx);
@@ -1764,8 +1654,6 @@ public class CandidateCreation {
 			else if (split[1].toLowerCase().matches(year)){
 				date = new DateTime(Integer.parseInt(split[1]), 1, 1, 0, 0, 0, 0);
 				return date.year().toInterval();
-			//	return new Interval(new DateTime(date.toString("YYYY-01-01'T'00:00:00.000")), new DateTime(date.toString("YYYY-12-31'T'23:59:59.999")));
-			//	return date.toString("YYYY"); 
 			}
 			else {
 				System.out.println("ERRO!! Expressï¿½o nï¿½o reconhecida: "+timeEx);
@@ -1781,15 +1669,11 @@ public class CandidateCreation {
 					int ordinal = ordinals.get(split[0].toLowerCase());
 					date = new DateTime(numeroAno, mesAno, ordinal, 0, 0, 0, 0);
 					return date.dayOfMonth().toInterval();
-				//	return new Interval(new DateTime(date.toString("YYYY-MM-dd'T'00:00:00.000")), new DateTime(date.toString("YYYY-MM-dd'T'23:59:59.999")));
-				//	return date.toString("YYYY-MM-dd");
 				}
 				else if(split[1].toLowerCase().matches("months?")){
 					int ordinal = ordinals.get(split[0].toLowerCase());
 					date = new DateTime(numeroAno, ordinal, 0, 0, 0, 0, 0);
 					return date.monthOfYear().toInterval();
-				//	return new Interval(new DateTime(date.toString("YYYY-MM-01'T'00:00:00.000")), new DateTime(date.toString("YYYY-MM-30'T'23:59:59.999")));
-				//	return date.toString("YYYY-MM");
 				}
 				else {
 					System.out.println("ERRO!! Expressï¿½o nï¿½o reconhecida: "+timeEx);
@@ -1831,11 +1715,8 @@ public class CandidateCreation {
 				if(split[0].toLowerCase().matches(textual_number)){
 					if(split[2].toLowerCase().matches("earlier") || split[2].toLowerCase().matches("ago")){
 						if(split[1].toLowerCase().matches("minutes?")){
-						//	date = new DateTime(numeroAno, mesAno, diaMes, date.getHourOfDay(), date.getMinuteOfHour()-days.get(split[0].toLowerCase()), 0, 0);
 							date = date.minusMinutes(days.get(split[0].toLowerCase()));
 							return date.minuteOfHour().toInterval();
-						//	return new Interval(new DateTime(date.toString("YYYY-MM-dd'T'hh:mm:00.000")), new DateTime(date.toString("YYYY-MM-dd'T'hh:mm:59.999")));
-						//	return date.toString("YYYY-MM-dd'T'hh:mm");
 						}
 						else if(split[1].toLowerCase().matches("hours?")){
 							date = date.minusHours(days.get(split[0].toLowerCase()));
@@ -1856,11 +1737,8 @@ public class CandidateCreation {
 					}
 					else if(split[2].toLowerCase().matches("later")){
 						if(split[1].toLowerCase().matches("minutes?")){
-						//	date = new DateTime(numeroAno, mesAno, diaMes, date.getHourOfDay(), date.getMinuteOfHour()+days.get(split[0].toLowerCase()), 0, 0);
 							date.plusMinutes(days.get(split[0].toLowerCase()));
 							return date.minuteOfHour().toInterval();
-						//	return new Interval(new DateTime(date.toString("YYYY-MM-dd'T'hh:mm:00.000")), new DateTime(date.toString("YYYY-MM-dd'T'hh:mm:59.999")));
-						//	return date.toString("YYYY-MM-dd'T'hh:mm");
 						}
 						else if(split[1].toLowerCase().matches("hours?")){
 							date = date.plusHours(days.get(split[0].toLowerCase()));
@@ -1904,13 +1782,10 @@ public class CandidateCreation {
 					date = new DateTime(Integer.parseInt(split[0]), Integer.parseInt(split[1]), 1, 0, 0, 0, 0);
 					return date.monthOfYear().toInterval();
 				}
-			//	return new Interval(new DateTime(date.toString("YYYY-MM-01'T'00:00:00.000")), new DateTime(date.toString("YYYY-MM-30'T'23:59:59.999")));
 			}
 			else if (split.length == 1){
 				date = date.year().setCopy(Integer.parseInt(split[0].replaceAll("'", "")));
 				return date.year().toInterval();
-			//	return new Interval(new DateTime(date.toString("YYYY-01-01'T'00:00:00.000")), new DateTime(date.toString("YYYY-12-31'T'23:59:59.999")));
-			//	return new DateTime(Integer.parseInt(split[0]), 1, 1, 0, 0, 0, 0).toString("YYYY");
 			}
 			else if (split.length == 3){
 				date = new DateTime(Integer.parseInt(split[0]), Integer.parseInt(split[1]), Integer.parseInt(split[2]), 0, 0, 0, 0);
@@ -1967,19 +1842,18 @@ public class CandidateCreation {
 		}
 		else if (timeEx.toLowerCase().matches(exp11)){
 			String[] split = timeEx.split(" ");
-			System.out.println("ola2");
+			System.out.println("express‹o 11");
 			return null;
 		}
 		else if (timeEx.toLowerCase().matches(exp12)){
 			String[] split = timeEx.split(" ");
-			System.out.println("ola3");
+			System.out.println("express‹o 12");
 			return null;
 		}
-	/*	else if (timeEx.toLowerCase().matches(exp13)){//"((next|previous|last|following|a) (few|many|"+textual_number+"|"+numeric_days+") "+calendar_granularity+"s?)";
-			String[] split = timeEx.split(" ");
-			
-			
-		}*/
+		else if (timeEx.toLowerCase().matches(exp13)){//"((next|previous|last|following|a) (few|many|"+textual_number+"|"+numeric_days+") "+calendar_granularity+"s?)";
+			String[] split = timeEx.split(" ");	
+			System.out.println("express‹o 13");			
+		}
 		else if (timeEx.toLowerCase().matches(exp14)){//"("+vague+" "+textual_number+" "+calendar_granularity+"s?)";
 			String[] split = timeEx.split(" ");
 			
@@ -2149,8 +2023,6 @@ public class CandidateCreation {
 				date = new DateTime(numeroAno, months.get(split[0].toLowerCase()), Integer.parseInt(split[1]), 0, 0, 0, 0);
 			
 			return date.dayOfMonth().toInterval();
-		//	return new Interval(new DateTime(date.toString("YYYY-MM-dd'T'00:00:00.000")), new DateTime(date.toString("YYYY-MM-dd'T'23:59:59.999")));
-		//	return date.toString("YYYY-MM-dd");
 			
 		}//Expression like "1st October 2010"
 		else if (timeEx.toLowerCase().matches(exp17)){
@@ -2171,8 +2043,6 @@ public class CandidateCreation {
 					date = new DateTime(Integer.parseInt(split[2]), months.get(split[1].toLowerCase().replaceAll(",", "")), Integer.parseInt(split[0]), 0, 0, 0, 0);
 				
 				return date.dayOfMonth().toInterval();
-			//	return new Interval(new DateTime(date.toString("YYYY-MM-dd'T'00:00:00.000")), new DateTime(date.toString("YYYY-MM-dd'T'23:59:59.999")));
-			//	return date.toString("YYYY-MM-dd");
 			}
 			else if(split.length == 2){
 				if(split[0].matches("[0-9]{1,2}(st|nd|rd|th)"))
@@ -2181,8 +2051,6 @@ public class CandidateCreation {
 					date = new DateTime(numeroAno, months.get(split[1].toLowerCase()), Integer.parseInt(split[0]), 0, 0, 0, 0);
 				
 				return date.dayOfMonth().toInterval();
-			//	return new Interval(new DateTime(date.toString("YYYY-MM-dd'T'00:00:00.000")), new DateTime(date.toString("YYYY-MM-dd'T'23:59:59.999")));
-			//	return date.toString("YYYY-MM-dd");
 			}
 			else if (split.length == 4){
 				if(split[1].matches("[0-9]{1,2}(st|nd|rd|th)"))
@@ -2204,14 +2072,10 @@ public class CandidateCreation {
 				if (split[1].toLowerCase().matches(monthspec)){
 					date = new DateTime(numeroAno, months.get(split[1].toLowerCase()), 1, 0, 0, 0, 0);
 					return date.monthOfYear().toInterval();
-				//	return new Interval(new DateTime(date.toString("YYYY-MM-01'T'00:00:00.000")), new DateTime(date.toString("YYYY-MM-30'T'23:59:59.999")));
-				//	return date.toString("YYYY-MM");
 				}
 				else if (split[1].toLowerCase().matches(fullyear)){
 					date = new DateTime(Integer.parseInt(split[1]), 1, 1, 0, 0, 0, 0);
 					return date.year().toInterval();
-				//	return new Interval(new DateTime(date.toString("YYYY-01-01'T'00:00:00.000")), new DateTime(date.toString("YYYY-12-31'T'23:59:59.999")));
-				//	return date.toString("YYYY");
 				}
 				else {
 					System.out.println("ERRO!! Expressï¿½o nï¿½o reconhecida: "+timeEx);
@@ -2225,8 +2089,6 @@ public class CandidateCreation {
 				}
 				date = new DateTime(Integer.parseInt(split[1]), months.get(split[0].toLowerCase().replace(",", "")), 1, 0, 0, 0, 0);
 				return date.monthOfYear().toInterval();
-			//	return new Interval(new DateTime(date.toString("YYYY-MM-dd'T'00:00:00.000")), new DateTime(date.toString("YYYY-MM-dd'T'23:59:59.999")));
-			//	return date.toString("YYYY-MM-dd");
 			}
 			else if (split.length == 1){
 				if (split[0].contains(",")){
@@ -2237,15 +2099,11 @@ public class CandidateCreation {
 					date = new DateTime(numeroAno, mesAno, Integer.parseInt(split[0]), 0, 0, 0, 0);
 					return date.dayOfMonth().toInterval();
 				}
-			//	return new Interval(new DateTime(date.toString("YYYY-MM-01'T'00:00:00.000")), new DateTime(date.toString("YYYY-MM-30'T'23:59:59.999")));
-			//	return date.toString("YYYY-MM");
 			}
 			else if (split.length == 3 && !split[0].toLowerCase().matches("around")){
 				split[0] = split[0].replaceAll("\\.", "");
 				date = new DateTime(Integer.parseInt(split[2]), months.get(split[0].toLowerCase().replace(",", "")), Integer.parseInt(split[1].toLowerCase().replace(",", "")), 0, 0, 0, 0);
 				return date.dayOfMonth().toInterval();
-			//	return new Interval(new DateTime(date.toString("YYYY-MM-dd'T'00:00:00.000")), new DateTime(date.toString("YYYY-MM-dd'T'23:59:59.999")));
-			//	return date.toString("YYYY-MM-dd");
 			}
 			else if (split.length == 3 && split[0].toLowerCase().matches("around")){
 				if (split[2].matches("[0-9]{1,2}")){
@@ -2255,11 +2113,7 @@ public class CandidateCreation {
 				else if (split[2].matches(fullyear)){
 					date = new DateTime(Integer.parseInt(split[2]), months.get(split[1].toLowerCase()), 1, 0, 0, 0, 0);
 					return date.monthOfYear().toInterval();
-				//	return new Interval(new DateTime(date.toString("YYYY-MM-01'T'00:00:00.000")), new DateTime(date.toString("YYYY-MM-30'T'23:59:59.999")));
-				//	return date.toString("YYYY-MM");
 				}
-			//	return new Interval(new DateTime(date.toString("YYYY-MM-dd'T'00:00:00.000")), new DateTime(date.toString("YYYY-MM-dd'T'23:59:59.999")));
-			//	return date.toString("YYYY-MM-dd");
 			}
 			else {
 				System.out.println("ERRO!! Expressï¿½o nï¿½o reconhecida: "+timeEx);
@@ -2269,7 +2123,7 @@ public class CandidateCreation {
 			}
 		else if (timeEx.toLowerCase().matches(exp19)){
 			String[] split = timeEx.split(" ");
-			System.out.println("ola10");
+			System.out.println("express‹o 10");
 			return null;
 		}
 		else if (timeEx.toLowerCase().matches(exp20)){
@@ -2301,14 +2155,10 @@ public class CandidateCreation {
 			if (split[3].toLowerCase().matches("year")){
 				date = new DateTime(numeroAno, 1, 1, 0, 0, 0, 0);
 				return date.year().toInterval();
-			//	return new Interval(new DateTime(date.toString("YYYY-01-01'T'00:00:00.000")), new DateTime(date.toString("YYYY-12-31'T'23:59:59.999")));
-			//	return date.toString("YYYY");
 			}
 			else if (split[3].toLowerCase().matches("month")){
 				date = new DateTime(numeroAno, mesAno, 1, 0, 0, 0, 0);
 				return date.monthOfYear().toInterval();
-			//	return new Interval(new DateTime(date.toString("YYYY-MM-01'T'00:00:00.000")), new DateTime(date.toString("YYYY-MM-30'T'23:59:59.999")));
-			//	return date.toString("YYYY-MM");
 			}		
 			
 		}
@@ -2381,7 +2231,7 @@ public class CandidateCreation {
 	//Expression like "in more than sixteen hours"
 	private static String exp12 = "((within|in ((more|less) than )("+vague+" )?)"+textual_number+" "+calendar_granularity+"s?)";
 	//Expression like "following two hours"
-	//private static String exp13 = "((next|previous|last|following|a) (few|many|"+textual_number+"|"+numeric_days+") "+calendar_granularity+"s?)";
+	private static String exp13 = "((next|previous|last|following|a) (few|many|"+textual_number+"|"+numeric_days+") "+calendar_granularity+"s?)";
 	//Expression like "around four hours"  
 	private static String exp14 = "("+vague+" ("+textual_number+"|"+numeric_days+") "+calendar_granularity+"s?)";
 	//Expression like "tomorrow 20:59pm"

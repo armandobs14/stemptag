@@ -39,24 +39,25 @@ public class TIMEXMLAnnotator implements Chunker {
  	    		timex.setNormalized(TIMEXRuleDisambiguation.createCanonicalForm(chunkText));
  	    		normalized = timex.getNormalizedSet();
  	    		if (normalized != null){
- 	    		//	String bestCandidate = TIMEXRegressionDisambiguation.disambiguate(chunkText, normalized, regressionModel);
- 	            //	timex.setNormalized(bestCandidate);
+ 	    			String bestCandidate = TIMEXRegressionDisambiguation.disambiguate(chunkText, normalized, regressionModel);
+ 	            	timex.setNormalized(bestCandidate);
  	            	CandidateCreation.numberCandidatesTimex = 0;
  	    		}
- 	    		else if (CandidateCreation.past_future_present_null_ref == 6){
+ 	    		else if (CandidateCreation.past_future_present_null_ref == 2){
  	    			timex.setNormalized("FUTURE_REF");
  	    			CandidateCreation.past_future_present_null_ref = 0;
- 	    			chunks.add(timex);
  	    		}
- 	    		/*if (	timex.getNormalized()!=null &&
- 	    				!timex.getNormalized().contains("P") && 
- 	            		!timex.getNormalized().contains("REF") && 
- 	            		!timex.getNormalized().contains("Q") && 
- 	            		!timex.getNormalized().contains("U") && 
- 	            		!timex.getNormalized().contains("X") &&
- 	            		CandidateCreation.granularityDuration == 0)*/
+ 	    		else if (CandidateCreation.past_future_present_null_ref == 3){
+ 	    			timex.setNormalized("PRESENT_REF");
+ 	    			CandidateCreation.past_future_present_null_ref = 0;
+ 	    		}
+ 	    		else if (CandidateCreation.past_future_present_null_ref == 4){
+ 	    			timex.setNormalized("PAST_REF");
+ 	    			CandidateCreation.past_future_present_null_ref = 0;
+ 	    		}
  	    		
  	    		CandidateCreation.granularityDuration = 0;
+ 	    		chunks.add(timex);
  	    	} else chunks.add(chunk);
  	    }
  		return chunks;

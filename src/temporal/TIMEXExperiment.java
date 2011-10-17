@@ -1,6 +1,5 @@
 package temporal;
 
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -8,46 +7,31 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringReader;
 import java.util.ArrayList;
-import java.util.GregorianCalendar;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Locale;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
+
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
-import org.joda.time.Period;
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import placerefs.PLACEChunkParser;
 import temporal.rules.TIMEXRuleAnnotator;
-import temporal.TIMEXMLAnnotator;
 import com.aliasi.chunk.BioTagChunkCodec;
 import com.aliasi.chunk.CharLmHmmChunker;
 import com.aliasi.chunk.Chunk;
-import com.aliasi.chunk.ChunkAndCharSeq;
-import com.aliasi.chunk.ChunkFactory;
 import com.aliasi.chunk.Chunker;
-import com.aliasi.chunk.ChunkerEvaluator;
 import com.aliasi.chunk.TagChunkCodec;
 import com.aliasi.corpus.Parser;
 import com.aliasi.corpus.XValidatingObjectCorpus;
@@ -62,10 +46,8 @@ import com.aliasi.stats.RegressionPrior;
 import com.aliasi.tokenizer.IndoEuropeanTokenizerFactory;
 import com.aliasi.tokenizer.TokenizerFactory;
 import com.aliasi.util.AbstractExternalizable;
-import com.aliasi.xml.SimpleElementHandler;
+
 import weka.classifiers.Classifier;
-import weka.core.Instance;
-import weka.classifiers.functions.SVMreg;
 
 public class TIMEXExperiment {
 
@@ -114,25 +96,11 @@ public class TIMEXExperiment {
 
 	public static void testResolver(Chunker chunker, Classifier regressionModel, File data,	PrintStream eval, PrintStream out) throws Exception {
 		//Evaluate CRF model
-	//	ChunkerEvaluator evaluator = new ChunkerEvaluator(chunker);
-	//	evaluator.setVerbose(true);
-		Parser parser = new PLACEChunkParser();
-	//	parser.setHandler(evaluator);
+	/*	ChunkerEvaluator evaluator = new ChunkerEvaluator(chunker);
+		evaluator.setVerbose(true);
+		Parser parser = new TIMEXChunkParser();
+		parser.setHandler(evaluator);
 		parser.parse(data);
-	/*	if (chunker instanceof TIMEXRuleAnnotator)
-			eval.print("Rule-based model - ");
-		else if (chunker instanceof ChainCrfChunker)
-			eval.print("CRF model - ");
-		else
-			eval.print("HMM model - ");
-		eval.println();*/
-	//	eval.println(evaluator.evaluation().perTypeEvaluation("TIMEX2").precisionRecallEvaluation().toString());
-		
-	/*	ChunkerEvaluator evaluatorRegression = new ChunkerEvaluator(new TIMEXMLDurationAnnotator(chunker,regressionModel));
-		evaluatorRegression.setVerbose(true);
-		Parser parserRegression = new TIMEXDurationChunkParser();
-		parserRegression.setHandler(evaluatorRegression);
-		parserRegression.parse(data);
 		if (chunker instanceof TIMEXRuleAnnotator)
 			eval.print("Rule-based model - ");
 		else if (chunker instanceof ChainCrfChunker)
@@ -140,11 +108,11 @@ public class TIMEXExperiment {
 		else
 			eval.print("HMM model - ");
 		eval.println();
-		eval.println(evaluatorRegression.evaluation().perTypeEvaluation("TIMEX2").precisionRecallEvaluation().toString());*/
+		eval.println(evaluator.evaluation().perTypeEvaluation("TIMEX2").precisionRecallEvaluation().toString());*/
 		
 		
 		//Evaluate Regression model
-	/*	NormalizedChunkerEvaluator evaluatorRegression = new NormalizedChunkerEvaluator(new TIMEXMLAnnotator(chunker,regressionModel));
+		NormalizedChunkerEvaluator evaluatorRegression = new NormalizedChunkerEvaluator(new TIMEXMLAnnotator(chunker,regressionModel));
 		evaluatorRegression.setVerbose(true);
 		Parser parserRegression = new TIMEXChunkParser();
 		parserRegression.setHandler(evaluatorRegression);
@@ -156,27 +124,14 @@ public class TIMEXExperiment {
 		else
 			eval.print("HMM model - ");
 		eval.println();
-		eval.println(evaluatorRegression.evaluation().perTypeEvaluation("TIMEX2").precisionRecallEvaluation().toString());*/
+		eval.println(evaluatorRegression.evaluation().perTypeEvaluation("TIMEX2").precisionRecallEvaluation().toString());
 		
-		//Evaluate Duration time expressions
-	/*	NormalizedChunkerEvaluator evaluatorRegression = new NormalizedChunkerEvaluator(new TIMEXMLDurationAnnotator(chunker,regressionModel));
-		evaluatorRegression.setVerbose(true);
-		Parser parserRegression = new TIMEXDurationChunkParser();
-		parserRegression.setHandler(evaluatorRegression);
-		parserRegression.parse(data);
-		if (chunker instanceof TIMEXRuleAnnotator)
-			eval.print("Rule-based model - ");
-		else if (chunker instanceof ChainCrfChunker)
-			eval.print("CRF model - ");
-		else
-			eval.print("HMM model - ");
-		eval.println();
-		eval.println(evaluatorRegression.evaluation().perTypeEvaluation("TIMEX2").precisionRecallEvaluation().toString());*/
-		
+		//Anota o corpus de acordo com o que o sistema dá
 		/*if (out != null)
 			annotateData(data, regressionModel, out, chunker);*/
 	}
 
+	//Faz a anotação do corpus de acordo com o que o sistema dá
 	public static void annotateData(File data, Classifier regressionModel, PrintStream out, Chunker chunker2)
 	throws Exception {
 		Chunker chunker = new TIMEXRuleDisambiguation(chunker2);
@@ -188,14 +143,11 @@ public class TIMEXExperiment {
 		NodeList docs = (NodeList) xpath.compile("//doc").evaluate(doc,	XPathConstants.NODESET);
 		out.println("<corpus>");
 		//For each document
-		for (int i = 1; i < docs.getLength(); i++) {
+		for (int i = 0; i < docs.getLength(); i++) {
 			CandidateCreation.candidatesMillisecondsSameDoc.clear();
     		CandidateCreation.candidatesIntervalsSameDoc.clear();
     		CandidateCreation.isFirstTimex = true;
-			//Computes the document timestamp for each document
-			/*CandidateCreation.docCreationTime = new DateTime(new String(docsTimestamp.item(i).getTextContent()));
-			System.out.println("DocCreationTimeTest: "+CandidateCreation.docCreationTime);*/
-			
+		
 			out.println("<doc>");
 			NodeList paragraphs = (NodeList) xpath.compile("./p").evaluate(docs.item(i), XPathConstants.NODESET);
 			//For each sentence
@@ -203,7 +155,7 @@ public class TIMEXExperiment {
 				//Computes the document timestamp for each document
 				if(paragraphs.item(j).hasAttributes()){
 					CandidateCreation.docCreationTime = new DateTime(new String(paragraphs.item(j).getAttributes().item(0).getTextContent()));
-					System.out.println("Data criaÔøΩÔøΩo documento: "+CandidateCreation.docCreationTime);
+					System.out.println("Data criação documento: "+CandidateCreation.docCreationTime);
 				}
 				
 				CandidateCreation.candidatesMillisecondsSameSentence.clear();
@@ -236,7 +188,6 @@ public class TIMEXExperiment {
 	 	            	String bestCandidate = TIMEXRegressionDisambiguation.disambiguate(chunkText, normalized, regressionModel);
 	 	            	timex.setNormalized(bestCandidate);
 	 	            	CandidateCreation.granularityDuration = 0;
-	 	            	System.out.println(bestCandidate+"!!!!!!!!!!!");
 	 	            	CandidateCreation.numberCandidatesTimex = 0;
 	 	            	out.print(" val=\"");
 	 	            	out.print(bestCandidate+"\"");
@@ -245,15 +196,6 @@ public class TIMEXExperiment {
 						out.print("</TIMEX2>");
 						lastPos = end;
 	 	            }
-				/*	if (chunking[k] instanceof NormalizedChunk) {
-						String normalized = ((NormalizedChunk) (chunking[k])).getNormalized();
-						if (normalized.length() > 0) {
-							if (!normalized.contains("=")) out.print(" VAL=\""); else out.print(" ");
-							out.print(normalized);
-							if (!normalized.contains("=")) out.print("\">"); else out.print(">");
-						} else
-							out.print(">");
-					} else*/
 				}
 				out.print(txt.substring(lastPos));
 				out.println("</p>");
@@ -277,47 +219,10 @@ public class TIMEXExperiment {
 			System.out.println("ACE_Corpus");
 			
 			}
-		else if (path.contains("mitre_spatialml")){
-			System.out.println("mitre_spatialml_Corpus");
-			
-			for (int pos = 0 ; pos < files.length ; pos++ ) {
-				PrintWriter out = ( pos < split ) ? train : test;
-				BufferedReader input = new BufferedReader(new FileReader(files[pos]));
-				String aux = null;
-				//flag to put space between concatenated lines
-				boolean flag = true;
-				String concat = "";
-				out.println("<doc>");
-					
-				while ( (aux=input.readLine()) != null && !aux.trim().contains("<TEXT>")) { }
-				while ( (aux=input.readLine()) != null){
-					if(aux.trim().equals("</TEXT>")) break;
-					
-					if (aux.equals(""))
-						continue;
-					
-					if (!aux.endsWith(".")){
-						if (flag){
-							concat = concat.trim() + aux.replaceAll("&quot;", "");
-							flag = false;
-						}
-						else 
-							concat = concat.trim() + " " + aux.replaceAll("&quot;", "");
-					}
-					else{
-						out.println("<p>" + concat.trim() + " " + aux.replaceAll("&quot;", "") + "</p>");
-						concat = "";
-						flag = true;
-					}
-				}
-				
-				out.println("</doc>");
-			}
-		}
 		else if(path.contains("aquaint_timeml")){
 			System.out.println("AQUAINT_TimeML_Corpus");
 			
-			for (int pos = 0 ; pos < files.length ; pos++ ) {
+			for (int pos = 1 ; pos < files.length ; pos++ ) {
 				PrintWriter out = ( pos < split ) ? train : test;
 				BufferedReader input = new BufferedReader(new FileReader(files[pos]));
 				String aux = null;
@@ -335,7 +240,6 @@ public class TIMEXExperiment {
 				out.println("<p DOCCREATIONTIME=\""+ano+"-"+mes+"-"+dia+"\"></p>");
 				
 				Boolean _flag=false;
-				Boolean _flag2=false; 
 				Pattern _patern = null;
 				Pattern _patern2 = null;
 				if(files[pos].getName().contains("APW")){
@@ -361,9 +265,6 @@ public class TIMEXExperiment {
 					if(_patern.matcher(aux).matches() | _patern2.matcher(aux).matches()) {
 					aux = aux.replaceAll("<EVENT[^>]*>","");aux = aux.replaceAll("</EVENT>","");
 					aux = aux.replaceAll("<SIGNAL[^>]*>","");aux = aux.replaceAll("</SIGNAL>","");
-					/*aux = aux.replaceAll("<TIMEX3 [^v]*value=(^>)*", "<TIMEX2 val=$1");
-					aux = aux.replaceAll("<TIMEX2 val=([^t|f|a|b|>]*)[^>]*", "<TIMEX2 val=$1");
-					aux = aux.replaceAll("</TIMEX3>","</TIMEX2>");*/
 					aux = aux.replaceAll("<TIMEX3","<TIMEX2");
 					aux = aux.replaceAll("</TIMEX3>","</TIMEX2>");
 					aux = aux.replaceAll(" tid=\"[^\"]*\"","");
@@ -422,9 +323,6 @@ public class TIMEXExperiment {
 					aux = aux.replaceAll(".*&amp;QL;.*","");
 					aux = aux.replaceAll(".*&amp;UR;.*","");
 					aux = aux.replaceAll("&amp;LR;","");
-				/*	aux = aux.replaceAll("<TIMEX3 [^v]*value=(^>)*", "<TIMEX2 val=$1");
-					aux = aux.replaceAll("<TIMEX2 val=([^e|t|f|a|b|m|>]*)[^>]*", "<TIMEX2 val=$1");
-					aux = aux.replaceAll("</TIMEX3>","</TIMEX2>");*/
 					aux = aux.replaceAll("<TIMEX3","<TIMEX2");
 					aux = aux.replaceAll("</TIMEX3>","</TIMEX2>");
 					aux = aux.replaceAll(" tid=\"[^\"]*\"","");
@@ -568,8 +466,6 @@ public class TIMEXExperiment {
 						aux = aux.replaceAll("value=\"([^\"]*)\" ","val=\"$1\"");
 						if (aux.contains("type=\"DURATION\"") || aux.contains("type=\"TIME\"") || aux.contains("type=\"DATE\""))
 							aux = aux.replaceAll(" type=\"([^\"]*)\"","");
-				//		aux = aux.replaceAll(" anchorTimeID=[^(>|v)]*"," ");
-				//		aux = aux.replaceAll("quant=\"every\""," ");
 						aux = aux.replaceAll("<TIMEX [^>]*>","");aux = aux.replaceAll("</TIMEX>","");
 						aux = aux.replaceAll("<ENAMEX[^>]*>","");aux = aux.replaceAll("</ENAMEX>","");
 						aux = aux.replaceAll("<time[^>]*>","");aux = aux.replaceAll("</time>","");
@@ -589,7 +485,6 @@ public class TIMEXExperiment {
 						aux = aux.replaceAll("<VG-VBN>","");aux = aux.replaceAll("</VG-VBN>","");
 						aux = aux.replaceAll("<JG>","");aux = aux.replaceAll("</JG>","");
 						aux = aux.replaceAll("<IN-MW>","");aux = aux.replaceAll("</IN-MW>","");
-				//		aux = aux.replaceAll("([^( |>)])<TIMEX3 ([^>]*)> ([^<]*)</TIMEX2>", "$1 <TIMEX2 $2>$3</TIMEX2>");
 						aux = aux.replace("<TIMEX3", "<TIMEX2");
 						aux = aux.replace("<s>", "<p>");
 						aux = aux.replace("</s>", "</p>");
@@ -638,123 +533,30 @@ public class TIMEXExperiment {
 	public static void main(String args[]) throws Exception {
 		if (args.length > 0)
 			path = args[0];
-	 //	prepareCorpus(path, 80);
-	 	
-	 	
 		
-		/*  PrintStream evaluationRules = new PrintStream(new
-		  FileOutputStream(new
-		  File(path+"/../timeml-evaluation-results-rules.txt"))); PrintStream
-		  annotationRules = new PrintStream(new FileOutputStream(new
-		  File(path+"/../timeml-annotation-results-rules.txt"))); testResolver(new
-		  TIMEXRuleAnnotator(), new File(path+"/../timex-test.xml"),
-		  evaluationRules, annotationRules); evaluationRules.close(); 
-		  annotationRules.close();
+	  //Prepara o corpus para estar de acordo com o que o sistema está à espera
+	  prepareCorpus(path, 80);
 		  
-		  PrintStream evaluationHMM = new PrintStream(new FileOutputStream(new
-		  File(path+"/../timeml-evaluation-results-hmm.txt"))); PrintStream
-		  annotationHMM = new PrintStream(new FileOutputStream(new
-		  File(path+"/../timeml-annotation-results-hmm.txt"))); trainResolver(new
-		  File(path+"/../timex-train.xml"),new File(path+"/../timex.model"));
-		  testResolver(new File(path+"/../timex.model"), new
-		  File(path+"/../timex-test.xml"), evaluationHMM, annotationHMM);
-		  evaluationHMM.close(); annotationHMM.close();*/
-		  
-		  PrintStream evaluationCRF = new PrintStream(new FileOutputStream(new File(path+"/../TimeBank_Future_References-evaluation-results-crf.txt"))); 
-		  PrintStream annotationCRF = new PrintStream(new FileOutputStream(new File(path+"/../WikiWars_CRF-Recognition-annotation-results-crf.txt")));
-		  CandidateCreation.init();
-		  CandidateCreation.isXMLflag = true;
-		  CandidateCreation.candidatesMillisecondsSameDoc.clear();
-		  CandidateCreation.candidatesIntervalsSameDoc.clear();
-		  CandidateCreation.candidatesMillisecondsSameSentence.clear();
-		  CandidateCreation.candidatesIntervalsSameSentence.clear();
-		  CandidateCreation.numberCandidatesTimex = 0;
-	//	  trainResolver(new File(path+"/../timex-train.xml"),new File(path+"/../timex.model.crf"));
-		  String main[] = {path+"/../timex-train.xml"};
-		  System.out.println("A entrar na desambiguaÔøΩÔøΩo");
-	//	  TIMEXRegressionDisambiguation.main(main);
-	//	  TIMEXRegressionDisambiguation.makeWordList("/Users/vitorloureiro/Desktop/Teste3/WikiWars_regression/01_WW2.key.xml");
-		  testResolver(new File(path+"/../../timex.model.crf"), "/Users/vitorloureiro/Desktop/Teste3/models/RegressionModel.svm", new File(path+"/../timex-train.xml"), evaluationCRF, annotationCRF);
-		  evaluationCRF.close(); 
-		  annotationCRF.close();
-		  
-	/*	
-		ArrayList<String> arr = new ArrayList<String>();
-		
-		String line;
-		
-		try
-        {    
-			BufferedReader in = new BufferedReader(new FileReader("/Users/vitorloureiro/Desktop/Teste/models/stopwords.txt"));
-            if (!in.ready())
-                throw new IOException();
-            while ((line = in.readLine()) != null) 
-            	arr.add(line);
-            in.close();
-        }
-        catch (IOException e)
-        {
-            System.out.println(e);
-        }
-		
-		
-        FileOutputStream fo = new FileOutputStream("/Users/vitorloureiro/Desktop/Teste/models/StopWords.lex");  
-        ObjectOutputStream oo=new ObjectOutputStream(fo);          
-        oo.writeObject(arr);   
-        oo.close();
-        */
-		
-	/*	CandidateCreation.init();
-		Interval date1 = CandidateCreation.normalizeTimex("April 2011", new DateTime());
-		System.out.println(date1);/*
-	/*	Interval date2 = CandidateCreation.normalizeTimex("the end of January 1936", new DateTime());
-		System.out.println(date1);
-		System.out.println(date2);
-		
-	//	System.out.println(TIMEXRuleDisambiguation.estimateOverlap(date1, date2));
-		
-		/*DateTime date = new DateTime(1960, 1, 1, 0, 0, 0, 0);
-		System.out.println(new Period(0, 1, 0, 0, 0, 0, 0, 0).getMillis());*/
-		
-	/*	ArrayList<Interval> tree = TIMEXRuleDisambiguation.createCanonicalForm("April 14, 1979");
-		
-		Iterator<Interval> it = tree.iterator();
-		
-		while (it.hasNext()){
-			System.out.println(it.next());
-		}*/
-		
-	//	System.out.println(date);
-		
-		
-/*		NormalizedChunk c1 = new NormalizedChunk(ChunkFactory.createChunk(0, 1, "TIMEX2", 0));
-		c1.setNormalized("2011");
-		NormalizedChunk c2 = new NormalizedChunk(ChunkFactory.createChunk(1, 4, "TIMEX2", 1));
-		c2.setNormalized("2012");
-		NormalizedChunk c3 = new NormalizedChunk(ChunkFactory.createChunk(2, 5, "TIMEX2", 2));
-		c3.setNormalized("2013");
-		NormalizedChunk c4 = new NormalizedChunk(ChunkFactory.createChunk(0, 1, "TIMEX2", 0));
-		c4.setNormalized("2011");
-		
-		Set<NormalizedChunk> result = new HashSet<NormalizedChunk>();
-		
-		result.add(c1);
-		result.add(c2);
-		result.add(c3);
-		
-		Iterator<NormalizedChunk> it = result.iterator();
-		
-    	while(it.hasNext()){
-    		NormalizedChunk nChunk = it.next();
-    		if (nChunk.equals(c4)){
-    			it.remove();
-    			break;
-    		}	
-    	}
+	  PrintStream evaluationCRF = new PrintStream(new FileOutputStream(new File(path+"/../Wikiwars-evaluation-results-crf.txt"))); 
+	  PrintStream annotationCRF = new PrintStream(new FileOutputStream(new File(path+"/../WikiWars_CRF-Recognition-annotation-results-crf.txt")));
+	  CandidateCreation.init();
+	  CandidateCreation.isXMLflag = true;
+	  CandidateCreation.candidatesMillisecondsSameDoc.clear();
+	  CandidateCreation.candidatesIntervalsSameDoc.clear();
+	  CandidateCreation.candidatesMillisecondsSameSentence.clear();
+	  CandidateCreation.candidatesIntervalsSameSentence.clear();
+	  CandidateCreation.numberCandidatesTimex = 0;
+	  //treina o modelo CRF
+	  trainResolver(new File(path+"/../timex-train.xml"),new File(path+"/../timex.model.crf"));
+	  String main[] = {path+"/../timex-train.xml"};
+	  System.out.println("A entrar na desambiguação");
+	  //Treina modelo de regressão
+	  TIMEXRegressionDisambiguation.main(main);
 
-    for (NormalizedChunk refChunk : result) {
-        System.out.println(refChunk.getNormalized());
-    }*/
+	  //Testa o sistema
+	  testResolver(new File(path+"/../timex.model.crf"), "/Users/vitorloureiro/Desktop/Teste3/models/RegressionModel.svm", new File(path+"/../timex-test.xml"), evaluationCRF, annotationCRF);
+	  evaluationCRF.close(); 
+	  annotationCRF.close();
 		 
 	}
 

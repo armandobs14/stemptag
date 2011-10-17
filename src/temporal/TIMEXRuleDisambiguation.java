@@ -1,24 +1,11 @@
 package temporal;
 
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+
 import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.joda.time.DateTime;
-import org.joda.time.Duration;
 import org.joda.time.Interval;
-import org.joda.time.Period;
-import org.joda.time.Years;
 
 import com.aliasi.chunk.Chunk;
 import com.aliasi.chunk.Chunker;
@@ -55,53 +42,6 @@ public class TIMEXRuleDisambiguation implements Chunker {
  		return chunks;
     }
     
-    
-        
-	/** a date format for ISO 8601 dates */
-	private static final DateFormat DATE_FORMAT = new SimpleDateFormat ("yyyy-MM-dd");
-
-	/** a date format for ISO 8601 dates with time */
-	private static final DateFormat DATETIME_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
-
-	/**
-	 * an array of {@link TimeExMapping}s which is used to find and annotate a
-	 * few simple temporal expressions
-	 */
-	private static final TimeExMapping[] TIME_EX_MAPPING;
-	static {
-		String[][] mappings = new String[][] {
-				new String[] { "(this morning)", "[DATE]TEV" },
-				new String[] { "(this afternoon)", "[DATE]TAF" },
-				new String[] { "(this evening)", "[DATE]TNI" },
-				new String[] { "(tonight)", "[DATE]TNI" },
-				new String[] { "(from (\\d\\d)(?: ?(?:h|hours)))( to (\\d\\d) ?(?:h|hours))", "[DATE]T$2:00" + "[DATE]T$4:00" },
-				new String[] { "(at (\\d\\d) ?(?:h|hours))", "[DATE]T$2:00" },
-				new String[] { "(at (\\d) ?(?:h|hour))", "[DATE]T0$2:00" },
-				new String[] { "(at (\\d\\d:\\d\\d)(?: ?(?:h|Uhr))?)", "[DATE]T$2" },
-				new String[] { "(today)", "[DATE]" },
-				new String[] { "(now)", "[DATETIME]" } };
-		TIME_EX_MAPPING = new TimeExMapping[mappings.length];
-		for (int i = 0; i < mappings.length; i++) TIME_EX_MAPPING[i] = new TimeExMapping(mappings[i][0], mappings[i][1]);
-	}
-	
-    private static SimpleDateFormat[] formats = {
-            new SimpleDateFormat("yyyy"),
-        	new SimpleDateFormat("yyyy-MM"),
-            new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss"),
-            new SimpleDateFormat("yyyy-MM-dd'T'HH:mm"),
-            new SimpleDateFormat("yyyy-MM-dd"),
-            new SimpleDateFormat("yy-MM-dd'T'HH:mm:ss"),
-            new SimpleDateFormat("yy-MM-dd'T'HH:mm"),
-            new SimpleDateFormat("dd-MM-yyyy"),
-            new SimpleDateFormat("dd/MM/yyyy"),
-            new SimpleDateFormat("dd.MM.yyyy"),
-            new SimpleDateFormat("yy-MM-dd"),
-            new SimpleDateFormat("yyyy G"),
-            new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss Z"),
-            new SimpleDateFormat("yyyyy.MMMMM.dd GGG hh:mm aaa"),
-            new SimpleDateFormat("yyyy.MM.dd G 'at' HH:mm:ss z")
-    };
-    
     //Estimate overlap between two intervals
     /**
      * @param interval1 -> The first interval
@@ -113,7 +53,9 @@ public class TIMEXRuleDisambiguation implements Chunker {
     	if (!interval1.overlaps(interval2))
     		return 0;
     	
-    	return interval1.overlap(interval2).toDurationMillis()/between(interval1, interval2); 
+    	return interval1.overlap(interval2).toDurationMillis()/between(interval1, interval2);
+    	
+    //	return (float)(interval1.getEndMillis()-interval2.getStartMillis())/(interval2.getEndMillis()-interval1.getStartMillis());	 
     }
     
     
@@ -424,72 +366,14 @@ public class TIMEXRuleDisambiguation implements Chunker {
 	 */
 	public static Interval createCanonicalForm( String timeEx, DateTime temporalContext ) {
 		Interval result;
-	//	Interval it = null;
-		// Attempt RegExp-based maching
-	/*	for (TimeExMapping timeExMapping : TIME_EX_MAPPING) {	
-			Matcher matcher = timeExMapping.nlPattern.matcher(timeEx.toLowerCase());
-			if (matcher.matches()) {
-				result = matcher.replaceAll(timeExMapping.timex2Pattern);
-				result = result.replaceAll("\\[DATE\\]", temporalContext.toString("YYYY-MM-dd"));
-				result = result.replaceAll("\\[DATETIME\\]", temporalContext.toString("YYYY-MM-dd'T'hh:mm:ss"));
-				return new Interval(new DateTime(temporalContext.getYear(), temporalContext.getMonthOfYear(), temporalContext.getDayOfMonth(), 0, 0, 0, 0), new DateTime(temporalContext.getYear(), temporalContext.getMonthOfYear(), temporalContext.getDayOfMonth(), 23, 59, 59, 999));
-			}			
-
-		}*/
-		// Attempt Temporal pattern matching
-   /*     Date time = null;
-        timeEx = timeEx.replace("a.c.","AD").replace("b.c.","BC");
-        for ( SimpleDateFormat format : formats ) try {
-                if(temporalContext!=null) format.set2DigitYearStart(temporalContext.getTime());
-                if(temporalContext!=null) format.setCalendar(temporalContext);
-        	    time = format.parse(timeEx);
-                break;
-        } catch (ParseException pE) { }
-        if (time != null) result = DATE_FORMAT.format(time);*/
         try{
-        result = CandidateCreation.normalizeTimex(timeEx,temporalContext);
+        	result = CandidateCreation.normalizeTimex(timeEx,temporalContext);
         }catch(Exception e){
         	e.printStackTrace();
         	return null;
         }
 				
 		return result;
-	}
-	
-	/**
-	 * A mapping between the NL pattern of a temporal expression and the
-	 * corresponding TIMEX2 pattern.
-	 */
-	private static class TimeExMapping {
-
-		/** the pattern of a NL temporal expression */
-		public final Pattern nlPattern;
-
-		/**
-		 * a replacement string according to the specification of
-		 * {@link String#replaceAll(String, String)} which is used to create
-		 * canonical form values for {@link Annotation} elements for temporal
-		 * expressions that are found with the {@link #nlPattern}
-		 */
-		public final String timex2Pattern;
-
-		/**
-		 * Constructs a {@link TimeExMapping} for the two given values.
-		 * 
-		 * @param nlPattern
-		 *            the pattern of a NL temporal expression
-		 * @param timex2Pattern
-		 *            a replacement string according to the specification of
-		 *            {@link String#replaceAll(String, String)} which is used to
-		 *            create canonical form values for {@link Annotation}
-		 *            elements for temporal expressions that are found with the
-		 *            given NL pattern
-		 */
-		public TimeExMapping(String nlPattern, String timex2Pattern) {
-			this.nlPattern = Pattern.compile(nlPattern);
-			this.timex2Pattern = timex2Pattern;
-		}
-
 	}
 	
 }

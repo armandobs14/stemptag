@@ -100,35 +100,27 @@ public class TIMEXChunkParser extends XMLParser<ObjectHandler> {
             NormalizedChunk chunk = new NormalizedChunk(ChunkFactory.createChunk(mStart,mEnd,mType,0));
             chunk.setNormalized(valAttribute);
             if (valAttribute == null){
-            	CandidateCreation.count_expressions_misc++;
             	chunk.setType(7);
             }
             else if (valAttribute.equals("")){
-            	CandidateCreation.count_expressions_misc++;
             	chunk.setType(7);
             }
             else if (setAttribute != null && setAttribute.toLowerCase().equals("yes")){
-            	CandidateCreation.count_expressions_rec++;
             	chunk.setType(1);
             }
             else if (valAttribute.toLowerCase().equals("past_ref")){
-            	CandidateCreation.count_expressions_past++;
             	chunk.setType(4);
             }
             else if (valAttribute.toLowerCase().equals("present_ref")){
-            	CandidateCreation.count_expressions_present++;
             	chunk.setType(5);
             }
             else if (valAttribute.toLowerCase().equals("future_ref")){
-            	CandidateCreation.count_expressions_future++;
             	chunk.setType(6);
             }
             else if (valAttribute.toLowerCase().contains("p") || valAttribute.toLowerCase().contains("pt")){
-            	CandidateCreation.count_duration++;
             	chunk.setType(2);
             }
             else{
-            	CandidateCreation.count_point++;
             	chunk.setType(3);
             }
             
@@ -141,7 +133,6 @@ public class TIMEXChunkParser extends XMLParser<ObjectHandler> {
         public Chunking getChunking() {
         	NormalizedChunking chunking = new NormalizedChunking(mBuf);
             for (NormalizedChunk chunk : mChunkList){
-          //  	if (chunk.getType() == 6)
             		chunking.add(chunk);
             }
             return chunking;

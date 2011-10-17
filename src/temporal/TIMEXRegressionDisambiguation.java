@@ -13,8 +13,8 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.HashMap;
 import java.util.TreeMap;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -23,6 +23,7 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
+
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.w3c.dom.Document;
@@ -30,14 +31,15 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+
 import weka.classifiers.Classifier;
 import weka.core.Instance;
+import weka.core.SparseInstance;
 import weka.classifiers.functions.SVMreg;
 
 public class TIMEXRegressionDisambiguation {
 	
 	public static Map<Integer,String> wordsList = new TreeMap<Integer,String>();
-	private static Map<String,Interval> trainingData = new HashMap<String,Interval>();
 	private static boolean flag;
 	
 	public static void init(String path){
@@ -72,15 +74,14 @@ public class TIMEXRegressionDisambiguation {
 				CandidateCreation.candidatesMillisecondsSameDoc.clear();
 	    		CandidateCreation.candidatesIntervalsSameDoc.clear();
 	    		CandidateCreation.isFirstTimex = true;
-	    		NodeList elemList = (NodeList) xpath.compile("./p").evaluate(docs.item(n), XPathConstants.NODESET);
-	    		
+	    		NodeList elemList = (NodeList) xpath.compile("./p").evaluate(docs.item(n), XPathConstants.NODESET);	
 			
 			//For every phrase in the document
 			for ( int i = 0; i < elemList.getLength(); i++ ) try {
 				//Tira o Timestamp do Documento
 				if(elemList.item(i).hasAttributes()){
 					CandidateCreation.docCreationTime = new DateTime(new String(elemList.item(i).getAttributes().item(0).getTextContent()));
-					System.out.println("Data criaï¿½ï¿½o documento: "+CandidateCreation.docCreationTime);
+					System.out.println("Data cria‹o documento: "+CandidateCreation.docCreationTime);
 				}
 					
 				//Limpa os arrays com os candidatos da mesma frase.
@@ -95,9 +96,6 @@ public class TIMEXRegressionDisambiguation {
 					String val = xpath.compile("./@val").evaluate(timex2List.item(j));
 					Interval Correctdate = CandidateCreation.normalizeTimex(val, new DateTime());
 					if (Correctdate == null){
-						/*//Limpa os arrays com os candidatos da mesma frase.
-						CandidateCreation.candidatesMillisecondsSameSentence.clear();
-					    CandidateCreation.candidatesIntervalsSameSentence.clear();*/
 						CandidateCreation.numberCandidatesTimex = 0;
 						continue;
 					}
@@ -157,7 +155,6 @@ public class TIMEXRegressionDisambiguation {
 	
 	@SuppressWarnings("unchecked")
 	public static String disambiguate ( String timex, ArrayList<Interval> candidates , Classifier model ) {
-		//double maxScore = Double.MIN_VALUE;
 		double maxScore = -1000;
 		Interval bestCandidate = null;
 		ArrayList<String> features;
@@ -200,7 +197,7 @@ public class TIMEXRegressionDisambiguation {
 	    			double feature7 = Double.parseDouble(features.get(6));
 	    			double feature8 = Double.parseDouble(features.get(7));
 	    			double feature9 = Double.parseDouble(features.get(8));
-	    			Instance instance = new Instance(9+wordFeatures.size());
+	    		/*	Instance instance = new Instance(9+wordFeatures.size());
 	    			instance.modifyValue(0, feature1);
 	    			instance.modifyValue(1, feature2);
 	    			instance.modifyValue(2, feature3);
@@ -209,10 +206,26 @@ public class TIMEXRegressionDisambiguation {
 	    			instance.modifyValue(5, feature6);
 	    			instance.modifyValue(6, feature7);
 	    			instance.modifyValue(7, feature8);
-	    			instance.modifyValue(8, feature9);
+	    			instance.modifyValue(8, feature9);*/
+	    			
+	    			Instance instance = new SparseInstance(9+wordFeatures.size());
+
+	    			
+	    			instance.setValue(0, feature1);
+	    			instance.setValue(1, feature2);
+	    			instance.setValue(2, feature3);
+	    			instance.setValue(3, feature4);
+	    			instance.setValue(4, feature5);
+	    			instance.setValue(5, feature6);
+	    			instance.setValue(6, feature7);
+	    			instance.setValue(7, feature8);
+	    			instance.setValue(8, feature9);
+	    			
+	    			/*for (int i = 0; i < wordFeatures.size(); i++)
+	    				instance.modifyValue(i+9, wordFeatures.get(i));*/
 	    			
 	    			for (int i = 0; i < wordFeatures.size(); i++)
-	    				instance.modifyValue(i+9, wordFeatures.get(i));
+	    				instance.setValue(i+9, wordFeatures.get(i));
 	    				    			
 	    			double score = model.classifyInstance(instance);
 	    			System.out.println("Score candidato "+candidateInterval.toString()+": "+score);
@@ -339,7 +352,7 @@ public class TIMEXRegressionDisambiguation {
 				while (it2.hasNext()){
 					if (it2.next().equals(s.replaceAll(",", "").toLowerCase())){
 						list.set(l, 1);
-						System.out.println("Posiï¿½ï¿½o da palavra "+s.replaceAll(",", "")+": "+l);
+						System.out.println("Posi‹o da palavra "+s.replaceAll(",", "")+": "+l);
 						break;
 					}
 					l++;	
@@ -409,20 +422,14 @@ public class TIMEXRegressionDisambiguation {
 	}
 	
 	public static void main ( String args[] ) throws Exception {
-	/*	Classifier model = trainModel( new File("/Users/vitorloureiro/Desktop/Teste3/teino_regressao.xml") );
-		long result = disambiguate("10th july 1944", model);
-		String resultStr = new SimpleDateFormat ("yyyy-MM-dd").format(result);
-		System.out.println(resultStr);*/
-	//	TIMEXExperiment.prepareCorpus("/Users/vitorloureiro/Desktop/Teste3/WikiWars_regression", 100);
 		CandidateCreation.init();
 		CandidateCreation.isXMLflag = true;
 		CandidateCreation.candidatesMillisecondsSameDoc.clear();
 		CandidateCreation.candidatesIntervalsSameDoc.clear();
-	//	TIMEXRegressionDisambiguation.makeWordList(args[0]);
-	//	TIMEXRegressionDisambiguation.makeWordList("/Users/vitorloureiro/Desktop/Teste3/WikiWars_regression/01_WW2.key.xml");
+		
+		//Carrega lista de palavras para usar nas features do modelo de regress‹o 
 		TIMEXRegressionDisambiguation.makeWordList("/Users/vitorloureiro/Desktop/Teste3/timex-train.xml");
 		File fileData = File.createTempFile("ranking-data", ".arff");
-		System.out.println(fileData.getAbsolutePath());
 		PrintWriter o = new PrintWriter(new FileWriter(fileData.getAbsolutePath()));
         o.println("@RELATION  timex-learn-to-rank");
         o.println("@ATTRIBUTE feature1      NUMERIC");
@@ -439,7 +446,7 @@ public class TIMEXRegressionDisambiguation {
         o.println("@ATTRIBUTE overlap       NUMERIC");
         o.println("@DATA");
         
-        //trainModel( new File(args[0]), o);
+        //Treina o modelo de regress‹o
         trainModel( new File("/Users/vitorloureiro/Desktop/Teste3/timex-train.xml"), o);
         
 		TIMEXRegressionDisambiguation.flag = false;

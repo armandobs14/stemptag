@@ -33,14 +33,17 @@ public class CRFFeatureExtractor implements com.aliasi.crf.ChainCrfFeatureExtrac
 	String hmmPOSModelFile;
 	
 	HashSet<String> timeNames;
-	HashSet<String> placeNames;
 	HashSet<String> personNames;
 	HashSet<String> facilityNames;
 	HashSet<String> companyNames;
 	HashSet<String> festivalNames;
 	HashSet<String> titleNames;
-	HashSet<String> governmentNames;
 	HashSet<String> ambiguousTimeNames;
+	HashSet<String> monthNames;
+	HashSet<String> placeTypeNames;
+	HashSet<String> weekNames;
+	HashSet<String> governmentNames;
+	HashSet<String> locationNames;
 	
     public CRFFeatureExtractor() throws ClassNotFoundException, IOException { hmmPOSModelFile = null; }
 
@@ -51,25 +54,43 @@ public class CRFFeatureExtractor implements com.aliasi.crf.ChainCrfFeatureExtrac
 	public CRFFeatureExtractor(String hmmPos, boolean dictionaries, boolean pos) { 
 		if(pos && hmmPos!=null) this.hmmPOSModelFile = hmmPos; 
 		if(hmmPos!=null && dictionaries) try {
-			//timeNames = readDictionary(new File(hmmPos + File.separator + "timeNames.lst"));
-			//timeNames = readDictionary(new File("/Users/vitorloureiro/Desktop/Geo-Temporal/timeNames.lst"));
-			  placeNames = readDictionary(new File("/Users/vitorloureiro/Desktop/Geo-Temporal/PlaceLexicon/locationNames.lst"));
-			  personNames = readDictionary(new File("/Users/vitorloureiro/Desktop/Geo-Temporal/PlaceLexicon/person.lst")); 
-			  facilityNames = readDictionary(new File("/Users/vitorloureiro/Desktop/Geo-Temporal/PlaceLexicon/facility.lst"));
-			  companyNames = readDictionary(new File("/Users/vitorloureiro/Desktop/Geo-Temporal/PlaceLexicon/company.lst"));
-			  festivalNames = readDictionary(new File("/Users/vitorloureiro/Desktop/Geo-Temporal/PlaceLexicon/festival.lst"));
-			  titleNames = readDictionary(new File("/Users/vitorloureiro/Desktop/Geo-Temporal/PlaceLexicon/title.lst"));
-			  governmentNames = readDictionary(new File("/Users/vitorloureiro/Desktop/Geo-Temporal/PlaceLexicon/government.lst"));
-              ambiguousTimeNames = readDictionary(new File("/Users/vitorloureiro/Desktop/Geo-Temporal/PlaceLexicon/ambiguousTimeNames.lst"));
-			  System.out.println("TamanhoPlaceNames: "+placeNames.size());
-			  System.out.println("TamanhoPlaceNames: "+personNames.size());
-			  System.out.println("TamanhoPlaceNames: "+facilityNames.size());
-			  System.out.println("TamanhoPlaceNames: "+companyNames.size());
-			  System.out.println("TamanhoPlaceNames: "+festivalNames.size());
-			  System.out.println("TamanhoPlaceNames: "+titleNames.size());
-			  System.out.println("TamanhoPlaceNames: "+governmentNames.size());
-			if (placeNames == null)
+			  timeNames = readDictionary(new File("/Users/vitorloureiro/Desktop/Teste3/data/timeNames.lst"));
+			  personNames = readDictionary(new File("/Users/vitorloureiro/Desktop/Teste3/data/person.lst")); 
+			  facilityNames = readDictionary(new File("/Users/vitorloureiro/Desktop/Teste3/data/facility.lst"));
+			  companyNames = readDictionary(new File("/Users/vitorloureiro/Desktop/Teste3/data/company.lst"));
+			  festivalNames = readDictionary(new File("/Users/vitorloureiro/Desktop/Teste3/data/festival.lst"));
+			  titleNames = readDictionary(new File("/Users/vitorloureiro/Desktop/Teste3/data/title.lst"));
+			  ambiguousTimeNames = readDictionary(new File("/Users/vitorloureiro/Desktop/Teste3/data/ambiguousTimeNames.lst"));
+			  monthNames = readDictionary(new File("/Users/vitorloureiro/Desktop/Teste3/data/monthNames.lst"));
+			  placeTypeNames = readDictionary(new File("/Users/vitorloureiro/Desktop/Teste3/data/placeTypeNames.lst"));
+			  weekNames = readDictionary(new File("/Users/vitorloureiro/Desktop/Teste3/data/weekNames.lst"));
+			  governmentNames = readDictionary(new File("/Users/vitorloureiro/Desktop/Teste3/data/government.lst"));
+			  locationNames = readDictionary(new File("/Users/vitorloureiro/Desktop/Teste3/data/locationNames.lst"));
+			if (timeNames == null)
 				throw new Exception();
+			if (personNames == null)
+				throw new Exception();
+			if (facilityNames == null)
+				throw new Exception();
+			if (companyNames == null)
+				throw new Exception();
+			if (festivalNames == null)
+				throw new Exception();
+			if (titleNames == null)
+				throw new Exception();
+			if (ambiguousTimeNames == null)
+				throw new Exception();
+			if (monthNames == null)
+				throw new Exception();
+			if (placeTypeNames == null)
+				throw new Exception();
+			if (weekNames == null)
+				throw new Exception();
+			if (governmentNames == null)
+				throw new Exception();
+			if (locationNames == null)
+				throw new Exception();
+			
 		} catch ( Exception e ) { e.printStackTrace(); }
 	}
 	
@@ -126,6 +147,8 @@ public class CRFFeatureExtractor implements com.aliasi.crf.ChainCrfFeatureExtrac
         
     	public ChunkerFeatures(List<String> tokens, List<String> tags) {
             super(tokens,tags);
+            
+            //UNcomment when using the Google App
          /*   InputStream in = null;
             BufferedInputStream bufIn = null;
             ObjectInputStream objIn = null;
@@ -182,16 +205,17 @@ public class CRFFeatureExtractor implements com.aliasi.crf.ChainCrfFeatureExtrac
             	feats.set("POS_" + posTag,1.0);
             	if (!bos) feats.set("POS_PREV_" + prevPosTag,1.0);
             	if (!eos) feats.set("POS_NEXT_" + nextPosTag,1.0);
-			}
-			if ( placeNames!=null ) {
-            	if (placeNames.contains(token.toLowerCase())){
-            		feats.set("PNAMES",1.0);
+			}			
+			
+			if ( timeNames!=null ) {
+            	if (timeNames.contains(token.toLowerCase())){
+            		feats.set("TNAMES",1.0);
             	}
-            	if (!bos && placeNames.contains(prevToken.toLowerCase())){
-            		feats.set("PNAMES_PREV",1.0);
+            	if (!bos && timeNames.contains(prevToken.toLowerCase())){
+            		feats.set("TNAMES_PREV",1.0);
             	}
-            	if (!eos && placeNames.contains(nextToken.toLowerCase())){
-            		feats.set("PNAMES_NEXT",1.0);
+            	if (!eos && timeNames.contains(nextToken.toLowerCase())){
+            		feats.set("TNAMES_NEXT",1.0);
             	}
 			}
 			if ( personNames!=null ) {
@@ -249,6 +273,50 @@ public class CRFFeatureExtractor implements com.aliasi.crf.ChainCrfFeatureExtrac
             		feats.set("TTNAMES_NEXT",1.0);
             	}
 			}
+			if ( ambiguousTimeNames!=null ) {
+            	if (ambiguousTimeNames.contains(token.toLowerCase())){
+            		feats.set("ATNAMES",1.0);
+            	}
+            	if (!bos && ambiguousTimeNames.contains(prevToken.toLowerCase())){
+            		feats.set("ATNAMES_PREV",1.0);
+            	}
+            	if (!eos && ambiguousTimeNames.contains(nextToken.toLowerCase())){
+            		feats.set("ATNAMES_NEXT",1.0);
+            	}
+			}
+			if ( monthNames!=null ) {
+            	if (monthNames.contains(token.toLowerCase())){
+            		feats.set("MNAMES",1.0);
+            	}
+            	if (!bos && monthNames.contains(prevToken.toLowerCase())){
+            		feats.set("MNAMES_PREV",1.0);
+            	}
+            	if (!eos && monthNames.contains(nextToken.toLowerCase())){
+            		feats.set("MNAMES_NEXT",1.0);
+            	}
+			}
+			if ( placeTypeNames!=null ) {
+            	if (placeTypeNames.contains(token.toLowerCase())){
+            		feats.set("PTNAMES",1.0);
+            	}
+            	if (!bos && placeTypeNames.contains(prevToken.toLowerCase())){
+            		feats.set("PTNAMES_PREV",1.0);
+            	}
+            	if (!eos && placeTypeNames.contains(nextToken.toLowerCase())){
+            		feats.set("PTNAMES_NEXT",1.0);
+            	}
+			}
+			if ( weekNames!=null ) {
+            	if (weekNames.contains(token.toLowerCase())){
+            		feats.set("WNAMES",1.0);
+            	}
+            	if (!bos && weekNames.contains(prevToken.toLowerCase())){
+            		feats.set("WNAMES_PREV",1.0);
+            	}
+            	if (!eos && weekNames.contains(nextToken.toLowerCase())){
+            		feats.set("WNAMES_NEXT",1.0);
+            	}
+			}
 			if ( governmentNames!=null ) {
             	if (governmentNames.contains(token.toLowerCase())){
             		feats.set("GNAMES",1.0);
@@ -258,6 +326,17 @@ public class CRFFeatureExtractor implements com.aliasi.crf.ChainCrfFeatureExtrac
             	}
             	if (!eos && governmentNames.contains(nextToken.toLowerCase())){
             		feats.set("GNAMES_NEXT",1.0);
+            	}
+			}
+			if ( locationNames!=null ) {
+            	if (locationNames.contains(token.toLowerCase())){
+            		feats.set("LNAMES",1.0);
+            	}
+            	if (!bos && locationNames.contains(prevToken.toLowerCase())){
+            		feats.set("LNAMES_PREV",1.0);
+            	}
+            	if (!eos && locationNames.contains(nextToken.toLowerCase())){
+            		feats.set("LNAMES_NEXT",1.0);
             	}
 			}
 			for (String suffix : suffixes(token)) feats.set("SUFF_" + suffix,1.0);
@@ -270,13 +349,9 @@ public class CRFFeatureExtractor implements com.aliasi.crf.ChainCrfFeatureExtrac
         }
         
         public Map<String,? extends Number> edgeFeatures(int n, int k) {
-            boolean bos = n == 0;
-            boolean eos = (n + 1) >= numTokens();
-        	ObjectToDoubleMap<String> feats = new ObjectToDoubleMap<String>();
-            String prevToken = bos ? null : normedToken(n-1);
+            ObjectToDoubleMap<String> feats = new ObjectToDoubleMap<String>();
             feats.set("PREV_TAG_" + tag(k), 1.0);
             feats.set("PREV_TAG_TOKEN_CAT_"  + tag(k) + "_" + tokenCat(n-1), 1.0);
-            if (governmentNames.contains(prevToken.toLowerCase())) feats.set("PREV_TAG_TOKEN_CAT_"  + tag(k) + "_GNAMES", 1.0);
             return feats;
         }
         
