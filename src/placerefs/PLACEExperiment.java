@@ -11,9 +11,20 @@ import java.io.PrintStream;
 import java.io.PrintWriter;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.xpath.*;
+/*
 import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathFactory;
+*/
+
+import javax.xml.parsers.ParserConfigurationException;
 import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
+
+
+
 
 import placerefs.PLACEChunkParser;
 import temporal.rules.TIMEXRuleAnnotator;
@@ -42,7 +53,8 @@ import weka.classifiers.Classifier;
 public class PLACEExperiment {
 
 	private static String path = ".";
-
+	private static String outputPR = "/home/luis/Desktop/TESE/workspace/outputPlaceReferences";
+	
 	public static void trainResolver(File in, File out) throws Exception {
 		boolean crf = out.getAbsolutePath().endsWith(".crf");
 		Parser parser = new PLACEChunkParser();
@@ -185,9 +197,12 @@ public class PLACEExperiment {
 		out.println("</corpus>");
 	}
 
+	
 	public static void prepareCorpus ( String path, int percent ) throws IOException {
-		PrintWriter test = new PrintWriter(new FileWriter(path+"/../place-test.xml"));
-		PrintWriter train = new PrintWriter(new FileWriter(path+"/../place-train.xml"));
+		//PrintWriter test = new PrintWriter(new FileWriter(path+"/../place-test.xml"));
+		//PrintWriter train = new PrintWriter(new FileWriter(path+"/../place-train.xml"));
+		PrintWriter test = new PrintWriter(new FileWriter(outputPR+"/place-test.xml"));
+		PrintWriter train = new PrintWriter(new FileWriter(outputPR+"/place-train.xml"));
 		File files[] = new File(path).listFiles();
 		int split = (int)((double)files.length * ((double)percent / 100.0));
 		System.out.println(split);
@@ -200,6 +215,10 @@ public class PLACEExperiment {
 			
 			for (int pos = 1 ; pos < files.length ; pos++ ) {
 				PrintWriter out = ( pos < split ) ? train : test;
+				
+				if(pos<split)
+					System.out.println("Ficheiro "+pos+": "+files[pos].getAbsolutePath());
+				
 				BufferedReader input = new BufferedReader(new FileReader(files[pos]));
 				String aux = null;
 				//flag to put space between concatenated lines
@@ -214,6 +233,14 @@ public class PLACEExperiment {
 					
 					if (aux.equals(""))
 						continue;
+					
+					//DEBUG
+					if(aux.contains("Â"))
+						System.out.println("ENCONTREI UM: "+ files[pos].getAbsolutePath());
+					
+					if(aux.contains("°We"))
+						System.out.println("ENCONTREI OUTRO: "+ files[pos].getAbsolutePath());
+					//DEBUG
 					
 					if (!aux.endsWith(".")){
 						if (flag){
@@ -243,6 +270,7 @@ public class PLACEExperiment {
 			}
 		}
 		
+		
 		test.println("</corpus>");
 		train.println("</corpus>");
 		test.close();
@@ -252,17 +280,36 @@ public class PLACEExperiment {
 	public static void main(String args[]) throws Exception {
 		if (args.length > 0)
 			path = args[0];
-	 	  prepareCorpus(path, 0);
-		  
+	 	  
+		if(path.contains("mitre_spatialml"))
+			prepareCorpus(path+"/data", 80);
+		else
+			prepareCorpus(path+"/LGLSeparado", 80);
+		
+		
+		  /*
 		  PrintStream evaluationCRF = new PrintStream(new FileOutputStream(new File(path+"/../Place-NOM2-evaluation-results-crf.txt"))); 
 		  PrintStream annotationCRF = new PrintStream(new FileOutputStream(new File(path+"/../Place_CRF-Recognition-annotation-results-crf.txt")));
+		  */
+	 	  
+	 	  PrintStream evaluationCRF = new PrintStream(new FileOutputStream(new File(outputPR+"/Place-NOM2-evaluation-results-crf.txt"))); 
+		  PrintStream annotationCRF = new PrintStream(new FileOutputStream(new File(outputPR+"/Place_CRF-Recognition-annotation-results-crf.txt")));
+	 	  
 		  PLACEConstants.init();
 		  PLACEConstants.candidatesPlaceSameDoc.clear();
 	//	  trainResolver(new File(path+"/../place-train.xml"),new File(path+"/../place.model.crf"));
-		  String main[] = {path+"/../place-train.xml"};
+		  trainResolver(new File(outputPR+"/place-train.xml"),new File(outputPR+"/place.model.crf"));
+	//    String main[] = {path+"/../place-train.xml"};
+		  String main[] = {outputPR+"/place-train.xml"};
 	//	  System.out.println("A entrar na desambigua��o");
 	//	  PLACERegressionDisambiguation.main(main);
+		  
+		  /*
 		  testResolver(new File(path+"/../place.model.crf"), "/Users/vitorloureiro/Desktop/Geo-Temporal/geoModels/RegressionPlaceModel.svm", new File(path+"/../place-test.xml"), evaluationCRF, annotationCRF);
+		  */
+		  
+		  testResolver(new File(outputPR+"/place.model.crf"), outputPR+"/RegressionPlaceModel.svm", new File(outputPR+"/place-test.xml"), evaluationCRF, annotationCRF);
+		  
 		  evaluationCRF.close(); 
 		  annotationCRF.close();
 		
