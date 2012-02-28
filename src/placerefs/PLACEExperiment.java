@@ -92,7 +92,8 @@ public class PLACEExperiment {
 	public static void testResolver(File model, String regressionModelFilePath, File data, PrintStream eval, PrintStream out) throws Exception {
 		Chunker chunker = null;
 		chunker = (Chunker) AbstractExternalizable.readObject(model);
-		Classifier regressionModel = PLACERegressionDisambiguation.readModel(regressionModelFilePath);
+		//Classifier regressionModel = PLACERegressionDisambiguation.readModel(regressionModelFilePath);
+		Classifier regressionModel = null;
 		testResolver(chunker, regressionModel, data, eval, out);
 	}
 
@@ -110,7 +111,7 @@ public class PLACEExperiment {
 		else
 			eval.print("HMM model - ");
 		eval.println();
-		eval.println(evaluator.evaluation().perTypeEvaluation("NOM").precisionRecallEvaluation().toString());
+		eval.println(evaluator.evaluation().perTypeEvaluation("NAM").precisionRecallEvaluation().toString());
 			
 		//Evaluate Regression model
 	/*	NormalizedPlaceChunkerEvaluator evaluatorRegression = new NormalizedPlaceChunkerEvaluator(new PLACEMLAnnotator(chunker,regressionModel));
@@ -201,6 +202,11 @@ public class PLACEExperiment {
 	public static void prepareCorpus ( String path, int percent ) throws IOException {
 		//PrintWriter test = new PrintWriter(new FileWriter(path+"/../place-test.xml"));
 		//PrintWriter train = new PrintWriter(new FileWriter(path+"/../place-train.xml"));
+		
+		File existeTrain = new File(outputPR+"/place-train.xml");
+		if(!existeTrain.exists()){
+			
+		
 		PrintWriter test = new PrintWriter(new FileWriter(outputPR+"/place-test.xml"));
 		PrintWriter train = new PrintWriter(new FileWriter(outputPR+"/place-train.xml"));
 		File files[] = new File(path).listFiles();
@@ -275,6 +281,11 @@ public class PLACEExperiment {
 		train.println("</corpus>");
 		test.close();
 		train.close();
+		}
+		else{
+			System.out.println("XML ja criado.");
+		}
+			
 	}
 
 	public static void main(String args[]) throws Exception {
@@ -298,7 +309,11 @@ public class PLACEExperiment {
 		  PLACEConstants.init();
 		  PLACEConstants.candidatesPlaceSameDoc.clear();
 	//	  trainResolver(new File(path+"/../place-train.xml"),new File(path+"/../place.model.crf"));
-		  trainResolver(new File(outputPR+"/place-train.xml"),new File(outputPR+"/place.model.crf"));
+		  
+		  File modeloCRF = new File(outputPR+"/place.model.crf"); 
+		  if(!modeloCRF.exists())
+			  trainResolver(new File(outputPR+"/place-train.xml"),new File(outputPR+"/place.model.crf"));
+		  
 	//    String main[] = {path+"/../place-train.xml"};
 		  String main[] = {outputPR+"/place-train.xml"};
 	//	  System.out.println("A entrar na desambigua��o");
@@ -308,7 +323,9 @@ public class PLACEExperiment {
 		  testResolver(new File(path+"/../place.model.crf"), "/Users/vitorloureiro/Desktop/Geo-Temporal/geoModels/RegressionPlaceModel.svm", new File(path+"/../place-test.xml"), evaluationCRF, annotationCRF);
 		  */
 		  
-		  testResolver(new File(outputPR+"/place.model.crf"), outputPR+"/RegressionPlaceModel.svm", new File(outputPR+"/place-test.xml"), evaluationCRF, annotationCRF);
+		  //testResolver(new File(outputPR+"/place.model.crf"), outputPR+"/RegressionPlaceModel.svm", new File(outputPR+"/place-test.xml"), evaluationCRF, annotationCRF);
+		  testResolver(new File(outputPR+"/place.model.crf"), "", new File(outputPR+"/place-test.xml"), evaluationCRF, annotationCRF);
+		  
 		  
 		  evaluationCRF.close(); 
 		  annotationCRF.close();
