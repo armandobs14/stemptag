@@ -216,8 +216,10 @@ public class PLACEExperiment {
 		test.println("<corpus>");
 		train.println("<corpus>");
 		//See which corpus to use
-		if (path.contains("mitre_spatialml")){
+		if (path.contains("mitre_spatialml"))
 			System.out.println("mitre_spatialml_Corpus");
+		else
+			System.out.println("LGL_Corpus");
 			
 			for (int pos = 1 ; pos < files.length ; pos++ ) {
 				PrintWriter out = ( pos < split ) ? train : test;
@@ -274,7 +276,7 @@ public class PLACEExperiment {
 				
 				out.println("</doc>");
 			}
-		}
+		
 		
 		
 		test.println("</corpus>");
