@@ -6,7 +6,7 @@ public class GazetteerEntry {
 
     public String name = null;
     
-    public String wiki_title = null;
+    //public String wiki_title = null;
     
     public String[] altNames  = null;
     

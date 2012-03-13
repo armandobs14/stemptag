@@ -26,9 +26,12 @@ import com.aliasi.util.FastCache;
 import com.aliasi.util.ObjectToDoubleMap;
 import com.aliasi.util.Streams;
 
+import placerefs.Configurator;
+
 public class CRFFeatureExtractor implements com.aliasi.crf.ChainCrfFeatureExtractor<String>, Serializable {
     
 	static final long serialVersionUID = 123L;
+	static final String pathLexic = "data";
 	
 	String hmmPOSModelFile;
 	
@@ -48,24 +51,21 @@ public class CRFFeatureExtractor implements com.aliasi.crf.ChainCrfFeatureExtrac
     public CRFFeatureExtractor() throws ClassNotFoundException, IOException { hmmPOSModelFile = null; }
 
     public CRFFeatureExtractor(String hmmPos) { 
-    	this(hmmPos,true,true);
-    }
-    
-	public CRFFeatureExtractor(String hmmPos, boolean dictionaries, boolean pos) { 
-		if(pos && hmmPos!=null) this.hmmPOSModelFile = hmmPos; 
-		if(hmmPos!=null && dictionaries) try {
-			  timeNames = readDictionary(new File("/Users/vitorloureiro/Desktop/Teste3/data/timeNames.lst"));
-			  personNames = readDictionary(new File("/Users/vitorloureiro/Desktop/Teste3/data/person.lst")); 
-			  facilityNames = readDictionary(new File("/Users/vitorloureiro/Desktop/Teste3/data/facility.lst"));
-			  companyNames = readDictionary(new File("/Users/vitorloureiro/Desktop/Teste3/data/company.lst"));
-			  festivalNames = readDictionary(new File("/Users/vitorloureiro/Desktop/Teste3/data/festival.lst"));
-			  titleNames = readDictionary(new File("/Users/vitorloureiro/Desktop/Teste3/data/title.lst"));
-			  ambiguousTimeNames = readDictionary(new File("/Users/vitorloureiro/Desktop/Teste3/data/ambiguousTimeNames.lst"));
-			  monthNames = readDictionary(new File("/Users/vitorloureiro/Desktop/Teste3/data/monthNames.lst"));
-			  placeTypeNames = readDictionary(new File("/Users/vitorloureiro/Desktop/Teste3/data/placeTypeNames.lst"));
-			  weekNames = readDictionary(new File("/Users/vitorloureiro/Desktop/Teste3/data/weekNames.lst"));
-			  governmentNames = readDictionary(new File("/Users/vitorloureiro/Desktop/Teste3/data/government.lst"));
-			  locationNames = readDictionary(new File("/Users/vitorloureiro/Desktop/Teste3/data/locationNames.lst"));
+		if(Configurator.fPOS && hmmPos!=null) this.hmmPOSModelFile = hmmPos; 
+		//if(hmmPos!=null && Configurator.fDictionaries) try {
+		if(Configurator.fDictionaries) try {
+			  timeNames = readDictionary(new File(pathLexic+"/timeNames.lst"));
+			  personNames = readDictionary(new File(pathLexic+"/person.lst")); 
+			  facilityNames = readDictionary(new File(pathLexic+"/facility.lst"));
+			  companyNames = readDictionary(new File(pathLexic+"/company.lst"));
+			  festivalNames = readDictionary(new File(pathLexic+"/festival.lst"));
+			  titleNames = readDictionary(new File(pathLexic+"/title.lst"));
+			  ambiguousTimeNames = readDictionary(new File(pathLexic+"/ambiguousTimeNames.lst"));
+			  monthNames = readDictionary(new File(pathLexic+"/monthNames.lst"));
+			  placeTypeNames = readDictionary(new File(pathLexic+"/placeTypeNames.lst"));
+			  weekNames = readDictionary(new File(pathLexic+"/weekNames.lst"));
+			  governmentNames = readDictionary(new File(pathLexic+"/government.lst"));
+			  locationNames = readDictionary(new File(pathLexic+"/locationNames.lst"));
 			if (timeNames == null)
 				throw new Exception();
 			if (personNames == null)
@@ -189,162 +189,178 @@ public class CRFFeatureExtractor implements com.aliasi.crf.ChainCrfFeatureExtrac
             String token = normedToken(n);
             String prevToken = bos ? null : normedToken(n-1);
             String nextToken = eos ? null : normedToken(n+1);
-            if (bos) feats.set("BOS",1.0);
-            if (eos) feats.set("EOS",1.0);
-            if (!bos && !eos) feats.set("!BOS!EOS",1.0);
-            feats.set("TOK_" + token, 1.0);
-            if (!bos) feats.set("TOK_PREV_" + prevToken,1.0);
-            if (!eos) feats.set("TOK_NEXT_" + nextToken,1.0);
-            feats.set("TOK_CAT_" + tokenCat, 1.0);
-            if (!bos) feats.set("TOK_CAT_PREV_" + prevTokenCat, 1.0);
-            if (!eos) feats.set("TOK_CAT_NEXT_" + nextTokenCat, 1.0);
-			if ( mPosTagging != null ) {
-            	String posTag = mPosTagging.tag(n);
-            	String prevPosTag = bos ? null : mPosTagging.tag(n-1);
-            	String nextPosTag = eos ? null : mPosTagging.tag(n+1);
-            	feats.set("POS_" + posTag,1.0);
-            	if (!bos) feats.set("POS_PREV_" + prevPosTag,1.0);
-            	if (!eos) feats.set("POS_NEXT_" + nextPosTag,1.0);
-			}			
-			
-			if ( timeNames!=null ) {
-            	if (timeNames.contains(token.toLowerCase())){
-            		feats.set("TNAMES",1.0);
-            	}
-            	if (!bos && timeNames.contains(prevToken.toLowerCase())){
-            		feats.set("TNAMES_PREV",1.0);
-            	}
-            	if (!eos && timeNames.contains(nextToken.toLowerCase())){
-            		feats.set("TNAMES_NEXT",1.0);
-            	}
-			}
-			if ( personNames!=null ) {
-            	if (personNames.contains(token.toLowerCase())){
-            		feats.set("PRNAMES",1.0);
-            	}
-            	if (!bos && personNames.contains(prevToken.toLowerCase())){
-            		feats.set("PRNAMES_PREV",1.0);
-            	}
-            	if (!eos && personNames.contains(nextToken.toLowerCase())){
-            		feats.set("PRNAMES_NEXT",1.0);
-            	}
-			}
-			if ( facilityNames!=null ) {
-            	if (facilityNames.contains(token.toLowerCase())){
-            		feats.set("FNAMES",1.0);
-            	}
-            	if (!bos && facilityNames.contains(prevToken.toLowerCase())){
-            		feats.set("FNAMES_PREV",1.0);
-            	}
-            	if (!eos && facilityNames.contains(nextToken.toLowerCase())){
-            		feats.set("FNAMES_NEXT",1.0);
-            	}
-			}
-			if ( companyNames!=null ) {
-            	if (companyNames.contains(token.toLowerCase())){
-            		feats.set("CNAMES",1.0);
-            	}
-            	if (!bos && companyNames.contains(prevToken.toLowerCase())){
-            		feats.set("CNAMES_PREV",1.0);
-            	}
-            	if (!eos && companyNames.contains(nextToken.toLowerCase())){
-            		feats.set("CNAMES_NEXT",1.0);
-            	}
-			}
-			if ( festivalNames!=null ) {
-            	if (festivalNames.contains(token.toLowerCase())){
-            		feats.set("FSNAMES",1.0);
-            	}
-            	if (!bos && festivalNames.contains(prevToken.toLowerCase())){
-            		feats.set("FSNAMES_PREV",1.0);
-            	}
-            	if (!eos && festivalNames.contains(nextToken.toLowerCase())){
-            		feats.set("FSNAMES_NEXT",1.0);
-            	}
-			}
-			if ( titleNames!=null ) {
-            	if (titleNames.contains(token.toLowerCase())){
-            		feats.set("TTNAMES",1.0);
-            	}
-            	if (!bos && titleNames.contains(prevToken.toLowerCase())){
-            		feats.set("TTNAMES_PREV",1.0);
-            	}
-            	if (!eos && titleNames.contains(nextToken.toLowerCase())){
-            		feats.set("TTNAMES_NEXT",1.0);
-            	}
-			}
-			if ( ambiguousTimeNames!=null ) {
-            	if (ambiguousTimeNames.contains(token.toLowerCase())){
-            		feats.set("ATNAMES",1.0);
-            	}
-            	if (!bos && ambiguousTimeNames.contains(prevToken.toLowerCase())){
-            		feats.set("ATNAMES_PREV",1.0);
-            	}
-            	if (!eos && ambiguousTimeNames.contains(nextToken.toLowerCase())){
-            		feats.set("ATNAMES_NEXT",1.0);
-            	}
-			}
-			if ( monthNames!=null ) {
-            	if (monthNames.contains(token.toLowerCase())){
-            		feats.set("MNAMES",1.0);
-            	}
-            	if (!bos && monthNames.contains(prevToken.toLowerCase())){
-            		feats.set("MNAMES_PREV",1.0);
-            	}
-            	if (!eos && monthNames.contains(nextToken.toLowerCase())){
-            		feats.set("MNAMES_NEXT",1.0);
-            	}
-			}
-			if ( placeTypeNames!=null ) {
-            	if (placeTypeNames.contains(token.toLowerCase())){
-            		feats.set("PTNAMES",1.0);
-            	}
-            	if (!bos && placeTypeNames.contains(prevToken.toLowerCase())){
-            		feats.set("PTNAMES_PREV",1.0);
-            	}
-            	if (!eos && placeTypeNames.contains(nextToken.toLowerCase())){
-            		feats.set("PTNAMES_NEXT",1.0);
-            	}
-			}
-			if ( weekNames!=null ) {
-            	if (weekNames.contains(token.toLowerCase())){
-            		feats.set("WNAMES",1.0);
-            	}
-            	if (!bos && weekNames.contains(prevToken.toLowerCase())){
-            		feats.set("WNAMES_PREV",1.0);
-            	}
-            	if (!eos && weekNames.contains(nextToken.toLowerCase())){
-            		feats.set("WNAMES_NEXT",1.0);
-            	}
-			}
-			if ( governmentNames!=null ) {
-            	if (governmentNames.contains(token.toLowerCase())){
-            		feats.set("GNAMES",1.0);
-            	}
-            	if (!bos && governmentNames.contains(prevToken.toLowerCase())){
-            		feats.set("GNAMES_PREV",1.0);
-            	}
-            	if (!eos && governmentNames.contains(nextToken.toLowerCase())){
-            		feats.set("GNAMES_NEXT",1.0);
-            	}
-			}
-			if ( locationNames!=null ) {
-            	if (locationNames.contains(token.toLowerCase())){
-            		feats.set("LNAMES",1.0);
-            	}
-            	if (!bos && locationNames.contains(prevToken.toLowerCase())){
-            		feats.set("LNAMES_PREV",1.0);
-            	}
-            	if (!eos && locationNames.contains(nextToken.toLowerCase())){
-            		feats.set("LNAMES_NEXT",1.0);
-            	}
-			}
-			for (String suffix : suffixes(token)) feats.set("SUFF_" + suffix,1.0);
-            if (!bos) for (String suffix : suffixes(prevToken)) feats.set("SUFF_PREV_" + suffix,1.0);
-            if (!eos) for (String suffix : suffixes(nextToken)) feats.set("SUFF_NEXT_" + suffix,1.0);
-            for (String prefix : prefixes(token)) feats.set("PREF_" + prefix,1.0);
-            if (!bos) for (String prefix : prefixes(prevToken)) feats.set("PREF_PREV_" + prefix,1.0);
-            if (!eos) for (String prefix : prefixes(nextToken)) feats.set("PREF_NEXT_" + prefix,1.0);
+            
+            if(Configurator.fBosEos){
+	            if (bos) feats.set("BOS",1.0);
+	            if (eos) feats.set("EOS",1.0);
+	            if (!bos && !eos) feats.set("!BOS!EOS",1.0);
+            }
+            
+            if(Configurator.fTokens){
+	            feats.set("TOK_" + token, 1.0);
+	            if (!bos) feats.set("TOK_PREV_" + prevToken,1.0);
+	            if (!eos) feats.set("TOK_NEXT_" + nextToken,1.0);
+            }
+            
+            if(Configurator.fTokenCat){
+	            feats.set("TOK_CAT_" + tokenCat, 1.0);
+	            if (!bos) feats.set("TOK_CAT_PREV_" + prevTokenCat, 1.0);
+	            if (!eos) feats.set("TOK_CAT_NEXT_" + nextTokenCat, 1.0);
+            }
+            
+            if(Configurator.fDictionaries){
+	            if ( mPosTagging != null ) {
+	            	String posTag = mPosTagging.tag(n);
+	            	String prevPosTag = bos ? null : mPosTagging.tag(n-1);
+	            	String nextPosTag = eos ? null : mPosTagging.tag(n+1);
+	            	feats.set("POS_" + posTag,1.0);
+	            	if (!bos) feats.set("POS_PREV_" + prevPosTag,1.0);
+	            	if (!eos) feats.set("POS_NEXT_" + nextPosTag,1.0);
+				}			
+				
+				if ( timeNames!=null ) {
+	            	if (timeNames.contains(token.toLowerCase())){
+	            		feats.set("TNAMES",1.0);
+	            	}
+	            	if (!bos && timeNames.contains(prevToken.toLowerCase())){
+	            		feats.set("TNAMES_PREV",1.0);
+	            	}
+	            	if (!eos && timeNames.contains(nextToken.toLowerCase())){
+	            		feats.set("TNAMES_NEXT",1.0);
+	            	}
+				}
+				if ( personNames!=null ) {
+	            	if (personNames.contains(token.toLowerCase())){
+	            		feats.set("PRNAMES",1.0);
+	            	}
+	            	if (!bos && personNames.contains(prevToken.toLowerCase())){
+	            		feats.set("PRNAMES_PREV",1.0);
+	            	}
+	            	if (!eos && personNames.contains(nextToken.toLowerCase())){
+	            		feats.set("PRNAMES_NEXT",1.0);
+	            	}
+				}
+				if ( facilityNames!=null ) {
+	            	if (facilityNames.contains(token.toLowerCase())){
+	            		feats.set("FNAMES",1.0);
+	            	}
+	            	if (!bos && facilityNames.contains(prevToken.toLowerCase())){
+	            		feats.set("FNAMES_PREV",1.0);
+	            	}
+	            	if (!eos && facilityNames.contains(nextToken.toLowerCase())){
+	            		feats.set("FNAMES_NEXT",1.0);
+	            	}
+				}
+				if ( companyNames!=null ) {
+	            	if (companyNames.contains(token.toLowerCase())){
+	            		feats.set("CNAMES",1.0);
+	            	}
+	            	if (!bos && companyNames.contains(prevToken.toLowerCase())){
+	            		feats.set("CNAMES_PREV",1.0);
+	            	}
+	            	if (!eos && companyNames.contains(nextToken.toLowerCase())){
+	            		feats.set("CNAMES_NEXT",1.0);
+	            	}
+				}
+				if ( festivalNames!=null ) {
+	            	if (festivalNames.contains(token.toLowerCase())){
+	            		feats.set("FSNAMES",1.0);
+	            	}
+	            	if (!bos && festivalNames.contains(prevToken.toLowerCase())){
+	            		feats.set("FSNAMES_PREV",1.0);
+	            	}
+	            	if (!eos && festivalNames.contains(nextToken.toLowerCase())){
+	            		feats.set("FSNAMES_NEXT",1.0);
+	            	}
+				}
+				if ( titleNames!=null ) {
+	            	if (titleNames.contains(token.toLowerCase())){
+	            		feats.set("TTNAMES",1.0);
+	            	}
+	            	if (!bos && titleNames.contains(prevToken.toLowerCase())){
+	            		feats.set("TTNAMES_PREV",1.0);
+	            	}
+	            	if (!eos && titleNames.contains(nextToken.toLowerCase())){
+	            		feats.set("TTNAMES_NEXT",1.0);
+	            	}
+				}
+				if ( ambiguousTimeNames!=null ) {
+	            	if (ambiguousTimeNames.contains(token.toLowerCase())){
+	            		feats.set("ATNAMES",1.0);
+	            	}
+	            	if (!bos && ambiguousTimeNames.contains(prevToken.toLowerCase())){
+	            		feats.set("ATNAMES_PREV",1.0);
+	            	}
+	            	if (!eos && ambiguousTimeNames.contains(nextToken.toLowerCase())){
+	            		feats.set("ATNAMES_NEXT",1.0);
+	            	}
+				}
+				if ( monthNames!=null ) {
+	            	if (monthNames.contains(token.toLowerCase())){
+	            		feats.set("MNAMES",1.0);
+	            	}
+	            	if (!bos && monthNames.contains(prevToken.toLowerCase())){
+	            		feats.set("MNAMES_PREV",1.0);
+	            	}
+	            	if (!eos && monthNames.contains(nextToken.toLowerCase())){
+	            		feats.set("MNAMES_NEXT",1.0);
+	            	}
+				}
+				if ( placeTypeNames!=null ) {
+	            	if (placeTypeNames.contains(token.toLowerCase())){
+	            		feats.set("PTNAMES",1.0);
+	            	}
+	            	if (!bos && placeTypeNames.contains(prevToken.toLowerCase())){
+	            		feats.set("PTNAMES_PREV",1.0);
+	            	}
+	            	if (!eos && placeTypeNames.contains(nextToken.toLowerCase())){
+	            		feats.set("PTNAMES_NEXT",1.0);
+	            	}
+				}
+				if ( weekNames!=null ) {
+	            	if (weekNames.contains(token.toLowerCase())){
+	            		feats.set("WNAMES",1.0);
+	            	}
+	            	if (!bos && weekNames.contains(prevToken.toLowerCase())){
+	            		feats.set("WNAMES_PREV",1.0);
+	            	}
+	            	if (!eos && weekNames.contains(nextToken.toLowerCase())){
+	            		feats.set("WNAMES_NEXT",1.0);
+	            	}
+				}
+				if ( governmentNames!=null ) {
+	            	if (governmentNames.contains(token.toLowerCase())){
+	            		feats.set("GNAMES",1.0);
+	            	}
+	            	if (!bos && governmentNames.contains(prevToken.toLowerCase())){
+	            		feats.set("GNAMES_PREV",1.0);
+	            	}
+	            	if (!eos && governmentNames.contains(nextToken.toLowerCase())){
+	            		feats.set("GNAMES_NEXT",1.0);
+	            	}
+				}
+				if ( locationNames!=null ) {
+	            	if (locationNames.contains(token.toLowerCase())){
+	            		feats.set("LNAMES",1.0);
+	            	}
+	            	if (!bos && locationNames.contains(prevToken.toLowerCase())){
+	            		feats.set("LNAMES_PREV",1.0);
+	            	}
+	            	if (!eos && locationNames.contains(nextToken.toLowerCase())){
+	            		feats.set("LNAMES_NEXT",1.0);
+	            	}
+				}
+            }
+            if(Configurator.fSuf){
+				for (String suffix : suffixes(token)) feats.set("SUFF_" + suffix,1.0);
+	            if (!bos) for (String suffix : suffixes(prevToken)) feats.set("SUFF_PREV_" + suffix,1.0);
+	            if (!eos) for (String suffix : suffixes(nextToken)) feats.set("SUFF_NEXT_" + suffix,1.0);
+            }
+            if(Configurator.fPref){
+	            for (String prefix : prefixes(token)) feats.set("PREF_" + prefix,1.0);
+	            if (!bos) for (String prefix : prefixes(prevToken)) feats.set("PREF_PREV_" + prefix,1.0);
+	            if (!eos) for (String prefix : prefixes(nextToken)) feats.set("PREF_NEXT_" + prefix,1.0);
+            }
             return feats;
         }
         

@@ -126,12 +126,12 @@ public class TIMEXExperiment {
 		eval.println();
 		eval.println(evaluatorRegression.evaluation().perTypeEvaluation("TIMEX2").precisionRecallEvaluation().toString());
 		
-		//Anota o corpus de acordo com o que o sistema dá
+		//Anota o corpus de acordo com o que o sistema da
 		/*if (out != null)
 			annotateData(data, regressionModel, out, chunker);*/
 	}
 
-	//Faz a anotação do corpus de acordo com o que o sistema dá
+	//Faz a anotacao do corpus de acordo com o que o sistema da
 	public static void annotateData(File data, Classifier regressionModel, PrintStream out, Chunker chunker2)
 	throws Exception {
 		Chunker chunker = new TIMEXRuleDisambiguation(chunker2);
@@ -155,7 +155,7 @@ public class TIMEXExperiment {
 				//Computes the document timestamp for each document
 				if(paragraphs.item(j).hasAttributes()){
 					CandidateCreation.docCreationTime = new DateTime(new String(paragraphs.item(j).getAttributes().item(0).getTextContent()));
-					System.out.println("Data criação documento: "+CandidateCreation.docCreationTime);
+					System.out.println("Data criacao documento: "+CandidateCreation.docCreationTime);
 				}
 				
 				CandidateCreation.candidatesMillisecondsSameSentence.clear();
@@ -534,7 +534,7 @@ public class TIMEXExperiment {
 		if (args.length > 0)
 			path = args[0];
 		
-	  //Prepara o corpus para estar de acordo com o que o sistema está à espera
+	  //Prepara o corpus para estar de acordo com o que o sistema esta a espera
 	  prepareCorpus(path, 80);
 		  
 	  PrintStream evaluationCRF = new PrintStream(new FileOutputStream(new File(path+"/../Wikiwars-evaluation-results-crf.txt"))); 
@@ -549,8 +549,8 @@ public class TIMEXExperiment {
 	  //treina o modelo CRF
 	  trainResolver(new File(path+"/../timex-train.xml"),new File(path+"/../timex.model.crf"));
 	  String main[] = {path+"/../timex-train.xml"};
-	  System.out.println("A entrar na desambiguação");
-	  //Treina modelo de regressão
+	  System.out.println("A entrar na desambiguacao");
+	  //Treina modelo de regressao
 	  TIMEXRegressionDisambiguation.main(main);
 
 	  //Testa o sistema

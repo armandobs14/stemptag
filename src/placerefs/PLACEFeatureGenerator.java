@@ -96,8 +96,10 @@ public class PLACEFeatureGenerator {
 		//Feature 8
 		if (candidate.wiki_text.equals("") || phraseText.equals(""))
 			arrayFeatures.add(new String("-1"));
-		else
-			arrayFeatures.add(String.valueOf(CosineSimilarity.INSTANCE.getSimilarity(candidate.wiki_text, phraseText)));
+		else{
+			Double x = CosineSimilarity.INSTANCE.getSimilarity(candidate.wiki_text, phraseText);
+			arrayFeatures.add(String.valueOf(x));
+		}
 		
 		//Feature 9
 		for (String s : candidate.altNames){

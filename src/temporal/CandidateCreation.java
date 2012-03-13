@@ -17,7 +17,7 @@ public class CandidateCreation {
 	public static ArrayList<Long> candidatesMillisecondsSameSentence = new ArrayList<Long>();
 	public static ArrayList<Interval> candidatesIntervalsSameSentence = new ArrayList<Interval>();
 	public static boolean isXMLflag;
-	//Vê se a frase tem um ponto final no fim
+	//Ve se a frase tem um ponto final no fim
 	public static boolean flag;
 	public static boolean isFirstTimex;
 	public static boolean isNull;
@@ -1842,17 +1842,17 @@ public class CandidateCreation {
 		}
 		else if (timeEx.toLowerCase().matches(exp11)){
 			String[] split = timeEx.split(" ");
-			System.out.println("expressão 11");
+			System.out.println("expressao 11");
 			return null;
 		}
 		else if (timeEx.toLowerCase().matches(exp12)){
 			String[] split = timeEx.split(" ");
-			System.out.println("expressão 12");
+			System.out.println("expressao 12");
 			return null;
 		}
 		else if (timeEx.toLowerCase().matches(exp13)){//"((next|previous|last|following|a) (few|many|"+textual_number+"|"+numeric_days+") "+calendar_granularity+"s?)";
 			String[] split = timeEx.split(" ");	
-			System.out.println("expressão 13");			
+			System.out.println("expressao 13");			
 		}
 		else if (timeEx.toLowerCase().matches(exp14)){//"("+vague+" "+textual_number+" "+calendar_granularity+"s?)";
 			String[] split = timeEx.split(" ");
@@ -2123,7 +2123,7 @@ public class CandidateCreation {
 			}
 		else if (timeEx.toLowerCase().matches(exp19)){
 			String[] split = timeEx.split(" ");
-			System.out.println("expressão 10");
+			System.out.println("expressao 10");
 			return null;
 		}
 		else if (timeEx.toLowerCase().matches(exp20)){

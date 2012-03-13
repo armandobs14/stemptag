@@ -12,6 +12,23 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
+
+/*import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.queryParser.QueryParser;
+import org.apache.lucene.search.Query;
+import org.apache.lucene.store.Directory;
+import org.apache.lucene.store.FSDirectory;
+import org.apache.lucene.util.Version;*/
+
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
+//import org.apache.lucene.document.Document;
+import org.apache.lucene.index.*;
+import org.apache.lucene.queryParser.*;
+import org.apache.lucene.search.*;
+import org.apache.lucene.store.*;
+import org.apache.lucene.util.Version;
+
+
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
@@ -28,6 +45,8 @@ import weka.classifiers.functions.SVMreg;
 
 public class PLACERegressionDisambiguation {
 		
+	private static String outputPR = "outputPlaceReferences";
+	
 	public static Classifier readModel ( String path ) throws Exception {
 		Classifier regression = (Classifier) weka.core.SerializationHelper.read(path);
 		return regression;
@@ -46,7 +65,7 @@ public class PLACERegressionDisambiguation {
 			List<GazetteerEntry> candidatos = new ArrayList<GazetteerEntry>();
 			ArrayList<GazetteerEntry> candidatosDestePlace = new ArrayList<GazetteerEntry>();
 			ArrayList<String> features;
-			ArrayList<String> data = new ArrayList<String>();;
+			ArrayList<String> data = new ArrayList<String>();
 			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 	        DocumentBuilder db = dbf.newDocumentBuilder();
 	        InputSource is = new InputSource();
@@ -91,7 +110,7 @@ public class PLACERegressionDisambiguation {
 					//Computes each candidate of the place expression
 	                CandidateGenerator cg = new CandidateGenerator();
 	                candidatos = cg.getCandidates(placeText);
-					Iterator<GazetteerEntry> it = candidatos.iterator();
+	                Iterator<GazetteerEntry> it = candidatos.iterator();
 					GazetteerEntry nextPlace;
 					
 					//Computes for each candidate its features
@@ -208,36 +227,39 @@ public class PLACERegressionDisambiguation {
 	
 	
 	public static void main ( String args[] ) throws Exception {
-		PLACEConstants.init();
-		PLACEConstants.candidatesPlaceSameDoc.clear();
-		File fileData = File.createTempFile("ranking-data", ".arff");
-		System.out.println(fileData.getAbsolutePath());
-		PrintWriter o = new PrintWriter(new FileWriter(fileData.getAbsolutePath()));
-        o.println("@RELATION  place-learn-to-rank");
-        o.println("@ATTRIBUTE feature1      NUMERIC");
-        o.println("@ATTRIBUTE feature2      NUMERIC");
-        o.println("@ATTRIBUTE feature3      NUMERIC");
-        o.println("@ATTRIBUTE feature4      NUMERIC");
-        o.println("@ATTRIBUTE feature5      NUMERIC");
-        o.println("@ATTRIBUTE feature6      NUMERIC");
-        o.println("@ATTRIBUTE feature7      NUMERIC");
-        o.println("@ATTRIBUTE feature8      NUMERIC");
-        o.println("@ATTRIBUTE feature9      NUMERIC");
-        o.println("@ATTRIBUTE distance      NUMERIC");
-        o.println("@DATA");
-        
-        trainModel( new File("/Users/vitorloureiro/Desktop/Geo-Temporal/place-train.xml"), o);
-		o.close();
-		
-        File fileModel = File.createTempFile("ranking-model", "tmp");
-        fileData.deleteOnExit();
-        fileModel.deleteOnExit();
-        String params2[] = { "-i", "-no-cv" , "-split-percentage", "99", "-K", "weka.classifiers.functions.supportVector.RBFKernel", "-t" , fileData.getAbsolutePath(), "-d" , fileModel.getAbsolutePath() };
-        SVMreg.main(params2);
-        Classifier model = readModel(fileModel.getAbsolutePath());
-        writeModel ( new File("/Users/vitorloureiro/Desktop/Geo-Temporal/geoModels/RegressionPlaceModel.svm"), model );
-        fileData.delete();
-        fileModel.delete();
+		File svm = new File(outputPR+"/RegressionPlaceModel.svm");
+		if(!svm.exists()){
+			PLACEConstants.init();
+			PLACEConstants.candidatesPlaceSameDoc.clear();
+			File fileData = File.createTempFile("ranking-data", ".arff");
+			System.out.println(fileData.getAbsolutePath());
+			PrintWriter o = new PrintWriter(new FileWriter(fileData.getAbsolutePath()));
+	        o.println("@RELATION  place-learn-to-rank");
+	        o.println("@ATTRIBUTE feature1      NUMERIC");
+	        o.println("@ATTRIBUTE feature2      NUMERIC");
+	        o.println("@ATTRIBUTE feature3      NUMERIC");
+	        o.println("@ATTRIBUTE feature4      NUMERIC");
+	        o.println("@ATTRIBUTE feature5      NUMERIC");
+	        o.println("@ATTRIBUTE feature6      NUMERIC");
+	        o.println("@ATTRIBUTE feature7      NUMERIC");
+	        o.println("@ATTRIBUTE feature8      NUMERIC");
+	        o.println("@ATTRIBUTE feature9      NUMERIC");
+	        o.println("@ATTRIBUTE distance      NUMERIC");
+	        o.println("@DATA");
+	        
+	        trainModel( new File(outputPR+"/place-train.xml"), o);
+			o.close();
+			
+	        File fileModel = File.createTempFile("ranking-model", "tmp");
+	        		fileData.deleteOnExit();
+	        fileModel.deleteOnExit();
+	        String params2[] = { "-i", "-no-cv" , "-split-percentage", "99", "-K", "weka.classifiers.functions.supportVector.RBFKernel", "-t" , fileData.getAbsolutePath(), "-d" , fileModel.getAbsolutePath() };
+	        SVMreg.main(params2);
+	        Classifier model = readModel(fileModel.getAbsolutePath());
+	        writeModel ( new File(outputPR+"/RegressionPlaceModel.svm"), model );
+	        fileData.delete();
+	        fileModel.delete();
+		}
 	}
 
 }

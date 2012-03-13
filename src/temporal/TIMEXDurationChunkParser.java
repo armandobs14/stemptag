@@ -106,7 +106,7 @@ public class TIMEXDurationChunkParser extends XMLParser<ObjectHandler>{
             for (NormalizedChunk chunk : mChunkList){
             	if (chunk.getNormalized() != null)
 	            	if (chunk.getNormalized().contains("P") && !chunk.getNormalized().contains("REF")){
-	            		System.out.println("Expressão temporal duração: "+chunk.getNormalized());
+	            		System.out.println("Expressao temporal duracao: "+chunk.getNormalized());
 	            		chunking.add(chunk);
 	            	}
             }

@@ -261,7 +261,7 @@ public class TIMEXRuleDisambiguation implements Chunker {
 		
 		try{
 		
-		//Verifica se o ficheiro é XML, se for usa como âncora a data de criação do documento
+		//Verifica se o ficheiro e XML, se for usa como ancora a data de criacao do documento
 		if (CandidateCreation.isXMLflag){
 			aux = createCanonicalForm( timeEx, CandidateCreation.docCreationTime );
 
@@ -287,7 +287,7 @@ public class TIMEXRuleDisambiguation implements Chunker {
 			}
 		}
 		
-		//Usa como âncora o presente dia
+		//Usa como ancora o presente dia
 		aux = createCanonicalForm( timeEx, today );
 
 		if (aux == null){
@@ -311,7 +311,7 @@ public class TIMEXRuleDisambiguation implements Chunker {
 			}
 		}
 		
-		//Verifica se é o primeiro timex, se não for, usa também como âncora todos os candidatos anteriores do documento
+		//Verifica se e o primeiro timex, se nao for, usa tambem como ancora todos os candidatos anteriores do documento
 		if (!CandidateCreation.isFirstTimex){
 			Iterator<Interval> it2 = CandidateCreation.candidatesIntervalsSameDoc.iterator();
 			while (it2.hasNext())

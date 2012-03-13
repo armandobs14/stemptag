@@ -6,11 +6,15 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+
 import org.apache.lucene.analysis.KeywordAnalyzer;
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
-import org.apache.lucene.index.GAEIndexReader;
-import org.apache.lucene.index.GAEIndexReaderPool;
-import org.apache.lucene.queryParser.QueryParser;
+//import org.apache.lucene.index.GAEIndexReader;
+//import org.apache.lucene.index.GAEIndexReaderPool;
+//import org.apache.lucene.queryParser.QueryParser;
+import org.apache.lucene.queryParser.*;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
@@ -31,18 +35,18 @@ public class CandidateGenerator {
     public CandidateGenerator() {
         try {
         	if ( Configurator.APP_ENGINE ) {
-        		GAEIndexReaderPool readerPool = GAEIndexReaderPool.getInstance();
+        		/*GAEIndexReaderPool readerPool = GAEIndexReaderPool.getInstance();
         		GAEIndexReader indexReaderComplete = readerPool.borrowReader(Configurator.LUCENE_KB_COMPLETE);
         		completeSearcher = new IndexSearcher(indexReaderComplete);
         		GAEIndexReaderPool readerPool2 = GAEIndexReaderPool.getInstance();
         		GAEIndexReader indexReaderSpell = readerPool.borrowReader(Configurator.LUCENE_KB_SPELLCHECK);
-        		spellSearcher = new IndexSearcher(indexReaderSpell);
+        		spellSearcher = new IndexSearcher(indexReaderSpell);*/
         	} else {
         		spellSearcher = new IndexSearcher(FSDirectory.open(new File(Configurator.LUCENE_KB_SPELLCHECK)), true);
         		completeSearcher = new IndexSearcher(FSDirectory.open(new File(Configurator.LUCENE_KB_COMPLETE)), true);
         	}
     		spellChecker = new SpellChecker(spellSearcher, "name", "eid");
-            completeQueryParser = new QueryParser("eid", new KeywordAnalyzer());
+            completeQueryParser = new QueryParser(Version.LUCENE_30, "eid", new KeywordAnalyzer());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -58,18 +62,29 @@ public class CandidateGenerator {
             } else {
                 antiDuplicates.add(candidate.eid);
             }
-            Query query = completeQueryParser.parse(candidate.eid);                         
+            
+            Query query = completeQueryParser.parse(candidate.eid);
+            
+            
             ScoreDoc[] hits = completeSearcher.search(query, 1).scoreDocs;
             Document d = completeSearcher.doc(hits[0].doc);
             GazetteerEntry c = new GazetteerEntry();
+            
+            //System.out.println("pop: " + d.get("pop"));
+            
             c.id = d.get("eid");
             c.name = d.get("name");
-            c.wiki_title = d.get("wiki_title");
+            /*c.wiki_title = d.get("wiki_title");
+            
+            System.out.println(c.wiki_title);*/
+            
+            
             c.wiki_text = d.get("text");
             c.altNames = d.getValues("altname");
             c.coordinates = d.get("coord");
             c.area = d.get("area");
-            c.population = d.get("pop");            
+            c.population = d.get("pop");
+            
             result.add(c);
         }
         return result;

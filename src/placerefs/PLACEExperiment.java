@@ -53,7 +53,7 @@ import weka.classifiers.Classifier;
 public class PLACEExperiment {
 
 	private static String path = ".";
-	private static String outputPR = "/home/luis/Desktop/TESE/workspace/outputPlaceReferences";
+	private static String outputPR = "outputPlaceReferences";
 	
 	public static void trainResolver(File in, File out) throws Exception {
 		boolean crf = out.getAbsolutePath().endsWith(".crf");
@@ -64,7 +64,7 @@ public class PLACEExperiment {
 			int minFeatureCount = 1, priorBlockSize = 3, minEpochs = 10, maxEpochs = 5000;
 			double priorVariance = 4.0, initialLearningRate = 0.05, learningRateDecay = 0.995, minImprovement = 0.00001;
 			TagChunkCodec tagChunkCodec = new BioTagChunkCodec(factory,	enforceConsistency);
-			ChainCrfFeatureExtractor<String> featureExtractor = new CRFFeatureExtractor(in.getParentFile().getAbsolutePath()+ "/pos-en-general-brown.HiddenMarkovModel", false, false);
+			ChainCrfFeatureExtractor<String> featureExtractor = new CRFFeatureExtractor("models/POS/pos-en-general-brown.HiddenMarkovModel");
 			RegressionPrior prior = RegressionPrior.gaussian(priorVariance,	uninformativeIntercept);
 			AnnealingSchedule annealingSchedule = AnnealingSchedule.exponential(initialLearningRate, learningRateDecay);
 			Reporter reporter = Reporters.stdOut().setLevel(LogLevel.ERROR);
@@ -92,41 +92,49 @@ public class PLACEExperiment {
 	public static void testResolver(File model, String regressionModelFilePath, File data, PrintStream eval, PrintStream out) throws Exception {
 		Chunker chunker = null;
 		chunker = (Chunker) AbstractExternalizable.readObject(model);
-		//Classifier regressionModel = PLACERegressionDisambiguation.readModel(regressionModelFilePath);
 		Classifier regressionModel = null;
+		if(Configurator.DISAMBIGUATION){
+			//System.out.println("STAAAAARLIIIIGHT: "+regressionModelFilePath);
+			regressionModel = PLACERegressionDisambiguation.readModel(regressionModelFilePath);
+		}
 		testResolver(chunker, regressionModel, data, eval, out);
 	}
 
 	public static void testResolver(Chunker chunker, Classifier regressionModel, File data,	PrintStream eval, PrintStream out) throws Exception {
 		//Evaluate CRF model
-		ChunkerEvaluator evaluator = new ChunkerEvaluator(chunker);
-		evaluator.setVerbose(false);
-		Parser parser = new PLACEChunkParser();
-		parser.setHandler(evaluator);
-		parser.parse(data);
-		if (chunker instanceof TIMEXRuleAnnotator)
-			eval.print("Rule-based model - ");
-		else if (chunker instanceof ChainCrfChunker)
-			eval.print("CRF model - ");
-		else
-			eval.print("HMM model - ");
-		eval.println();
-		eval.println(evaluator.evaluation().perTypeEvaluation("NAM").precisionRecallEvaluation().toString());
-			
+		if(Configurator.CLASSIFICATION){
+			ChunkerEvaluator evaluator = new ChunkerEvaluator(chunker);
+			evaluator.setVerbose(false);
+			Parser parser = new PLACEChunkParser();
+			parser.setHandler(evaluator);
+			parser.parse(data);
+			if (chunker instanceof TIMEXRuleAnnotator)
+				eval.print("Rule-based model - ");
+			else if (chunker instanceof ChainCrfChunker)
+				eval.print("CRF model - ");
+			else
+				eval.print("HMM model - ");
+			eval.println();
+			eval.println(evaluator.evaluation().perTypeEvaluation("NAM").precisionRecallEvaluation().toString());
+		}
 		//Evaluate Regression model
-	/*	NormalizedPlaceChunkerEvaluator evaluatorRegression = new NormalizedPlaceChunkerEvaluator(new PLACEMLAnnotator(chunker,regressionModel));
-		evaluatorRegression.setVerbose(false);
-		Parser parserRegression = new PLACEChunkParser();
-		parserRegression.setHandler(evaluatorRegression);
-		parserRegression.parse(data);
-		if (chunker instanceof TIMEXRuleAnnotator)
-			eval.print("Rule-based model - ");
-		else if (chunker instanceof ChainCrfChunker)
-			eval.print("CRF model - ");
-		else
-			eval.print("HMM model - ");
-		eval.println();
-		eval.println(evaluatorRegression.evaluation().perTypeEvaluation("PLACE").precisionRecallEvaluation().toString());*/
+		if(Configurator.DISAMBIGUATION){
+			NormalizedPlaceChunkerEvaluator evaluatorRegression = new NormalizedPlaceChunkerEvaluator(new PLACEMLAnnotator(chunker,regressionModel));
+			evaluatorRegression.setVerbose(false);
+			Parser parserRegression = new PLACEChunkParser();
+			parserRegression.setHandler(evaluatorRegression);
+			parserRegression.parse(data);
+			if (chunker instanceof TIMEXRuleAnnotator)
+				eval.print("Rule-based model - ");
+			else if (chunker instanceof ChainCrfChunker)
+				eval.print("CRF model - ");
+			else
+				eval.print("HMM model - ");
+			eval.println();
+			eval.println(evaluatorRegression.evaluation().perTypeEvaluation("PLACE").precisionRecallEvaluation().toString());
+		}
+		
+		
 		
 	//	if (out != null)
 	//		annotateData(data, regressionModel, out, chunker);
@@ -312,21 +320,30 @@ public class PLACEExperiment {
 		  PLACEConstants.candidatesPlaceSameDoc.clear();
 	//	  trainResolver(new File(path+"/../place-train.xml"),new File(path+"/../place.model.crf"));
 		  
-		  File modeloCRF = new File(outputPR+"/place.model.crf"); 
-		  if(!modeloCRF.exists())
-			  trainResolver(new File(outputPR+"/place-train.xml"),new File(outputPR+"/place.model.crf"));
-		  
+		  if(Configurator.CLASSIFICATION){
+			  File modeloCRF = new File(outputPR+"/place.model.crf"); 
+			  if(!modeloCRF.exists()){
+				  System.out.println("ENTREII!!!");
+				  trainResolver(new File(outputPR+"/place-train.xml"),new File(outputPR+"/place.model.crf"));
+			  }
+		  }
 	//    String main[] = {path+"/../place-train.xml"};
-		  String main[] = {outputPR+"/place-train.xml"};
-	//	  System.out.println("A entrar na desambigua��o");
-	//	  PLACERegressionDisambiguation.main(main);
 		  
+		  if(Configurator.DISAMBIGUATION){
+			  String main[] = {outputPR+"/place-train.xml"};
+			  System.out.println("A entrar na desambiguacao");
+			  PLACERegressionDisambiguation.main(main);
+		  }
 		  /*
 		  testResolver(new File(path+"/../place.model.crf"), "/Users/vitorloureiro/Desktop/Geo-Temporal/geoModels/RegressionPlaceModel.svm", new File(path+"/../place-test.xml"), evaluationCRF, annotationCRF);
 		  */
 		  
 		  //testResolver(new File(outputPR+"/place.model.crf"), outputPR+"/RegressionPlaceModel.svm", new File(outputPR+"/place-test.xml"), evaluationCRF, annotationCRF);
-		  testResolver(new File(outputPR+"/place.model.crf"), "", new File(outputPR+"/place-test.xml"), evaluationCRF, annotationCRF);
+		  if(Configurator.DISAMBIGUATION){
+			  testResolver(new File(outputPR+"/place.model.crf"), outputPR+"/RegressionPlaceModel.svm", new File(outputPR+"/place-test.xml"), evaluationCRF, annotationCRF);
+		  }else{
+			  testResolver(new File(outputPR+"/place.model.crf"), "", new File(outputPR+"/place-test.xml"), evaluationCRF, annotationCRF);
+		  }
 		  
 		  
 		  evaluationCRF.close(); 

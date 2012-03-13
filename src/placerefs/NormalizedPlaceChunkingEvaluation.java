@@ -166,8 +166,12 @@ public class NormalizedPlaceChunkingEvaluation extends ChunkingEvaluation{
 
 	static Set<NormalizedPLACEChunk> unscoredNormalizedChunkSet(Chunking chunking) {
         Set<NormalizedPLACEChunk> result = new HashSet<NormalizedPLACEChunk>();
-        for (Chunk chunk : chunking.chunkSet())
-            result.add((NormalizedPLACEChunk)chunk);
+        for (Chunk chunk : chunking.chunkSet()){
+            //System.out.println("LALALA: " + chunk.start() + " " + chunk.end() + " " + chunk.toString());
+            
+            NormalizedPLACEChunk newChunk = new NormalizedPLACEChunk(chunk);
+        	result.add(newChunk);
+        }
         return result;
     }
 	

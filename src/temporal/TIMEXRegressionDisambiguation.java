@@ -81,7 +81,7 @@ public class TIMEXRegressionDisambiguation {
 				//Tira o Timestamp do Documento
 				if(elemList.item(i).hasAttributes()){
 					CandidateCreation.docCreationTime = new DateTime(new String(elemList.item(i).getAttributes().item(0).getTextContent()));
-					System.out.println("Data criação documento: "+CandidateCreation.docCreationTime);
+					System.out.println("Data criacao documento: "+CandidateCreation.docCreationTime);
 				}
 					
 				//Limpa os arrays com os candidatos da mesma frase.
@@ -352,7 +352,7 @@ public class TIMEXRegressionDisambiguation {
 				while (it2.hasNext()){
 					if (it2.next().equals(s.replaceAll(",", "").toLowerCase())){
 						list.set(l, 1);
-						System.out.println("Posição da palavra "+s.replaceAll(",", "")+": "+l);
+						System.out.println("Posicao da palavra "+s.replaceAll(",", "")+": "+l);
 						break;
 					}
 					l++;	
@@ -427,7 +427,7 @@ public class TIMEXRegressionDisambiguation {
 		CandidateCreation.candidatesMillisecondsSameDoc.clear();
 		CandidateCreation.candidatesIntervalsSameDoc.clear();
 		
-		//Carrega lista de palavras para usar nas features do modelo de regressão 
+		//Carrega lista de palavras para usar nas features do modelo de regressao 
 		TIMEXRegressionDisambiguation.makeWordList("/Users/vitorloureiro/Desktop/Teste3/timex-train.xml");
 		File fileData = File.createTempFile("ranking-data", ".arff");
 		PrintWriter o = new PrintWriter(new FileWriter(fileData.getAbsolutePath()));
@@ -446,7 +446,7 @@ public class TIMEXRegressionDisambiguation {
         o.println("@ATTRIBUTE overlap       NUMERIC");
         o.println("@DATA");
         
-        //Treina o modelo de regressão
+        //Treina o modelo de regressao
         trainModel( new File("/Users/vitorloureiro/Desktop/Teste3/timex-train.xml"), o);
         
 		TIMEXRegressionDisambiguation.flag = false;

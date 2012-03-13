@@ -138,7 +138,7 @@ public class ModelTraining {
 				Boolean _flag=false;
 				Pattern _patern = null;	Pattern _patern2 = null;
 				
-				//Vê qual o tipo de ficheiro para ser correctamente processado
+				//Ve qual o tipo de ficheiro para ser correctamente processado
 				if(files[pos].getName().contains("APW")){
 					_patern = Pattern.compile("^\t.*");
 					_patern2 = Pattern.compile("   [A-Z].*");
@@ -155,7 +155,7 @@ public class ModelTraining {
 				else if ((files[pos].getName().contains("XIE"))){
 					_patern = Pattern.compile("^[A-Z]+.*");
 					_patern2 = Pattern.compile("^[A-Z]+.*");
-					_split = "§§";
+					_split = "ÔøΩÔøΩ";
 					_flag=true;
 				}
 				while ( (aux=input.readLine()) != null) { 
@@ -195,7 +195,7 @@ public class ModelTraining {
 					if (!aux.equals(""))
 						aux2 = aux2+" "+aux;
 					else if (_flag)
-						aux2 = aux2+"§§";
+						aux2 = aux2+"ÔøΩÔøΩ";
 					
 				}
 			aux2=" ";

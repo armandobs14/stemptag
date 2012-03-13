@@ -8,7 +8,7 @@ import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.analysis.tokenattributes.TermAttribute;
-import org.apache.lucene.index.GAEIndexReaderPool;
+//import org.apache.lucene.index.GAEIndexReaderPool;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.store.FSDirectory;
@@ -25,8 +25,8 @@ public final class CosineSimilarity {
     private CosineSimilarity() {
         try {
         	if ( Configurator.APP_ENGINE ) {
-        		GAEIndexReaderPool readerPool = GAEIndexReaderPool.getInstance();
-        		reader = readerPool.borrowReader(Configurator.LUCENE_KB_COMPLETE);
+        		//GAEIndexReaderPool readerPool = GAEIndexReaderPool.getInstance();
+        		//reader = readerPool.borrowReader(Configurator.LUCENE_KB_COMPLETE);
         	} else {
         		reader = IndexReader.open(FSDirectory.open(new File(Configurator.LUCENE_KB_COMPLETE)), true);
         	}
