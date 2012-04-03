@@ -20,6 +20,7 @@ import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
+import org.apache.lucene.store.SimpleFSDirectory;
 import org.apache.lucene.util.Version;
 
 public class CandidateGenerator {
@@ -43,16 +44,19 @@ public class CandidateGenerator {
         		spellSearcher = new IndexSearcher(indexReaderSpell);*/
         	} else {
         		spellSearcher = new IndexSearcher(FSDirectory.open(new File(Configurator.LUCENE_KB_SPELLCHECK)), true);
-        		completeSearcher = new IndexSearcher(FSDirectory.open(new File(Configurator.LUCENE_KB_COMPLETE)), true);
+        		completeSearcher = new IndexSearcher(SimpleFSDirectory.open(new File(Configurator.LUCENE_KB_COMPLETE)), true);
         	}
     		spellChecker = new SpellChecker(spellSearcher, "name", "eid");
-            completeQueryParser = new QueryParser(Version.LUCENE_30, "eid", new KeywordAnalyzer());
+            //completeQueryParser = new QueryParser(Version.LUCENE_30, "eid", new KeywordAnalyzer());
+    		completeQueryParser = new QueryParser(Version.LUCENE_35, "eid", new KeywordAnalyzer());
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     public List<GazetteerEntry> getCandidates(String toponym) throws Exception {
+	System.out.println("toponym candidate generation: " + toponym);
+
         List<SuggestWord> candidates = spellChecker.suggestSimilar(QueryParser.escape(toponym), Configurator.MAX_NAME_SUGGESTIONS);
         Set<String> antiDuplicates = new HashSet<String>();
         List<GazetteerEntry> result = new ArrayList<GazetteerEntry>();
@@ -63,8 +67,9 @@ public class CandidateGenerator {
                 antiDuplicates.add(candidate.eid);
             }
             
-            Query query = completeQueryParser.parse(candidate.eid);
+            System.out.println("CEID: " + candidate.eid + " Name:" + candidate.string);
             
+            Query query = completeQueryParser.parse(candidate.eid);
             
             ScoreDoc[] hits = completeSearcher.search(query, 1).scoreDocs;
             Document d = completeSearcher.doc(hits[0].doc);

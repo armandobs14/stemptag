@@ -113,12 +113,18 @@ public class PLACERegressionDisambiguation {
 	                Iterator<GazetteerEntry> it = candidatos.iterator();
 					GazetteerEntry nextPlace;
 					
+					System.out.println("N candidatos deste place: " + candidatos.size());
+					
 					//Computes for each candidate its features
 					while(it.hasNext()) {
 						String dataToPrint = "";
 						nextPlace = it.next();
+						
+						System.out.println("----------------------------------");
+						System.out.println("Candidato: " + nextPlace.name);
+						
 						candidatosDestePlace.add(nextPlace);
-	 	            	features = PLACEFeatureGenerator.featuresGenerator(nextPlace, phraseText, placeText);
+						features = PLACEFeatureGenerator.featuresGenerator(nextPlace, phraseText, placeText);
 
 	 	            	data.add(features.get(0));
 	 	            	data.add(features.get(1));
@@ -136,8 +142,14 @@ public class PLACERegressionDisambiguation {
 	 	            	
 	 	            	Point p1 = new Point(new Coordinate(CorrectlonAttribute,CorrectlatAttribute), new PrecisionModel(),4326);
 	 	            	Point p2 = new Point(new Coordinate(Double.parseDouble(nextPlace.coordinates.split(" ")[1].replaceAll("N|E|S|W", "")),Double.parseDouble(nextPlace.coordinates.split(" ")[0].replaceAll("N|E|S|W", ""))), new PrecisionModel(),4326);
+	 	            	Double vc = VincentyDistanceCalculator.getDistance(p1,p2);
 	 	            	
-	 	            	dataToPrint = dataToPrint+VincentyDistanceCalculator.getDistance(p1,p2); 	            	
+	 	            	System.out.println("Point p1: " + p1);
+	 	            	System.out.println("Point p2: " + p2);
+	 	            	System.out.println("Vincenty Dist: " + vc);
+	 	            	System.out.println("----------------------------------");
+	 	            	
+	 	            	dataToPrint = dataToPrint+vc;	
 	 	            	o.println(dataToPrint);
 	 	            	data.clear();
 	 	            	
@@ -169,16 +181,28 @@ public class PLACERegressionDisambiguation {
         GazetteerEntry candidatePlace;
         ArrayList<GazetteerEntry> candidatosDestePlace = new ArrayList<GazetteerEntry>();
         
+        System.out.println("#######################");
+        System.out.println("Disambiguate!");
+        
+        
         try {
 	
 			Iterator<GazetteerEntry> it = candidates.iterator();
-
+			
+			
+			System.out.println("PhraseText:" + phraseText);
+			System.out.println("Place:" + place);
+			
+			
 			// repeat steps below for each candidate disambiguation
 	            while(it.hasNext()) {
 	            	candidatePlace = it.next();
 	            	candidatosDestePlace.add(candidatePlace);
 	            	features = PLACEFeatureGenerator.featuresGenerator(candidatePlace, phraseText, place);
 	        
+	            	System.out.println("------------------------");
+	            	System.out.println("CandidatePlace:" + candidatePlace.name);
+	            	
 	    			double feature1 = Double.parseDouble(features.get(0));
 	    			double feature2 = Double.parseDouble(features.get(1).replaceAll(" ", ""));
 	    			double feature3 = Double.parseDouble(features.get(2));
@@ -188,6 +212,17 @@ public class PLACERegressionDisambiguation {
 	    			double feature7 = Double.parseDouble(features.get(6));
 	    			double feature8 = Double.parseDouble(features.get(7));
 	    			double feature9 = Double.parseDouble(features.get(8));
+	    			
+	    			System.out.println("Valor feature 1:" + feature1);
+ 	            	System.out.println("Valor feature 2:" + feature2);
+ 	            	System.out.println("Valor feature 3:" + feature3);
+ 	            	System.out.println("Valor feature 4:" + feature4);
+ 	            	System.out.println("Valor feature 5:" + feature5);
+ 	            	System.out.println("Valor feature 6:" + feature6);
+ 	            	System.out.println("Valor feature 7:" + feature7);
+ 	            	System.out.println("Valor feature 8:" + feature8);
+ 	            	System.out.println("Valor feature 9:" + feature9);
+	    			
 	    			Instance instance = new Instance(9);
 	    			instance.modifyValue(0, feature1);
 	    			instance.modifyValue(1, feature2);
@@ -201,11 +236,16 @@ public class PLACERegressionDisambiguation {
 	    				    			
 	    			double score = model.classifyInstance(instance);
 	    			
+	    			System.out.println("Score: " + score);
+	    			
 	    			if ( score < maxScore ) {
 	    				maxScore = score;
 	    				bestCandidate = candidatePlace;
 	    			}
-	            	
+	    			
+	    			System.out.println("MaxScore: " + maxScore);
+	    			System.out.println("BestCandidate: " + bestCandidate.name);
+	    			System.out.println("------------------------");
 	            }
 	            
 	            for (GazetteerEntry e : candidatosDestePlace){
@@ -231,34 +271,50 @@ public class PLACERegressionDisambiguation {
 		if(!svm.exists()){
 			PLACEConstants.init();
 			PLACEConstants.candidatesPlaceSameDoc.clear();
-			File fileData = File.createTempFile("ranking-data", ".arff");
-			System.out.println(fileData.getAbsolutePath());
-			PrintWriter o = new PrintWriter(new FileWriter(fileData.getAbsolutePath()));
-	        o.println("@RELATION  place-learn-to-rank");
-	        o.println("@ATTRIBUTE feature1      NUMERIC");
-	        o.println("@ATTRIBUTE feature2      NUMERIC");
-	        o.println("@ATTRIBUTE feature3      NUMERIC");
-	        o.println("@ATTRIBUTE feature4      NUMERIC");
-	        o.println("@ATTRIBUTE feature5      NUMERIC");
-	        o.println("@ATTRIBUTE feature6      NUMERIC");
-	        o.println("@ATTRIBUTE feature7      NUMERIC");
-	        o.println("@ATTRIBUTE feature8      NUMERIC");
-	        o.println("@ATTRIBUTE feature9      NUMERIC");
-	        o.println("@ATTRIBUTE distance      NUMERIC");
-	        o.println("@DATA");
-	        
-	        trainModel( new File(outputPR+"/place-train.xml"), o);
-			o.close();
 			
-	        File fileModel = File.createTempFile("ranking-model", "tmp");
-	        		fileData.deleteOnExit();
-	        fileModel.deleteOnExit();
-	        String params2[] = { "-i", "-no-cv" , "-split-percentage", "99", "-K", "weka.classifiers.functions.supportVector.RBFKernel", "-t" , fileData.getAbsolutePath(), "-d" , fileModel.getAbsolutePath() };
+			File fileData = new File(outputPR+"/ranking-data.arff");
+			
+			//File fileData = File.createTempFile("ranking-data", ".arff");
+			
+			if(!fileData.exists()){
+				PrintWriter o = new PrintWriter(new FileWriter(fileData.getAbsolutePath()));
+			        o.println("@RELATION  place-learn-to-rank");
+			        o.println("@ATTRIBUTE feature1      NUMERIC");
+	        		o.println("@ATTRIBUTE feature2      NUMERIC");
+	        		o.println("@ATTRIBUTE feature3      NUMERIC");
+	        		o.println("@ATTRIBUTE feature4      NUMERIC");
+	        		o.println("@ATTRIBUTE feature5      NUMERIC");
+	        		o.println("@ATTRIBUTE feature6      NUMERIC");
+		       		o.println("@ATTRIBUTE feature7      NUMERIC");
+			       	o.println("@ATTRIBUTE feature8      NUMERIC");
+			        o.println("@ATTRIBUTE feature9      NUMERIC");
+			        o.println("@ATTRIBUTE distance      NUMERIC");
+			        o.println("@DATA");
+
+			        trainModel( new File(outputPR+"/place-train.xml"), o);
+				o.close();
+			}
+	        //File fileModel = File.createTempFile("ranking-model", "tmp");
+		File fileModel = new File(outputPR+"/ranking-model.tmp");
+	        
+	        //fileData.deleteOnExit();
+	        //fileModel.deleteOnExit();
+
+		System.out.println("fileModel path: "+fileModel.getAbsolutePath());
+	        
+		//String params2[] = { "-i", "-no-cv" , "-split-percentage", "100", "-K", "weka.classifiers.functions.supportVector.RBFKernel", "-t" , fileData.getAbsolutePath(), "-d" , fileModel.getAbsolutePath() };
+		String params2[] = { "-i", "-no-cv" , "-K", "weka.classifiers.functions.supportVector.RBFKernel", "-t", fileData.getAbsolutePath(), "-d", fileModel.getAbsolutePath() };
 	        SVMreg.main(params2);
-	        Classifier model = readModel(fileModel.getAbsolutePath());
+		
+		if(fileModel.exists()){
+		Classifier model = readModel(fileModel.getAbsolutePath());
 	        writeModel ( new File(outputPR+"/RegressionPlaceModel.svm"), model );
-	        fileData.delete();
-	        fileModel.delete();
+		}
+		else{
+		System.out.println("NAO CRIEI O MODELO!");
+		}
+	        //fileData.delete();
+	        //fileModel.delete();
 		}
 	}
 

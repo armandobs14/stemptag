@@ -91,10 +91,9 @@ public class PLACEExperiment {
 
 	public static void testResolver(File model, String regressionModelFilePath, File data, PrintStream eval, PrintStream out) throws Exception {
 		Chunker chunker = null;
-		chunker = (Chunker) AbstractExternalizable.readObject(model);
 		Classifier regressionModel = null;
+		chunker = (Chunker) AbstractExternalizable.readObject(model);
 		if(Configurator.DISAMBIGUATION){
-			//System.out.println("STAAAAARLIIIIGHT: "+regressionModelFilePath);
 			regressionModel = PLACERegressionDisambiguation.readModel(regressionModelFilePath);
 		}
 		testResolver(chunker, regressionModel, data, eval, out);
@@ -115,7 +114,7 @@ public class PLACEExperiment {
 			else
 				eval.print("HMM model - ");
 			eval.println();
-			eval.println(evaluator.evaluation().perTypeEvaluation("NAM").precisionRecallEvaluation().toString());
+			eval.println(evaluator.evaluation().perTypeEvaluation(Configurator.chunkTypeForEvaluation).precisionRecallEvaluation().toString());
 		}
 		//Evaluate Regression model
 		if(Configurator.DISAMBIGUATION){
@@ -131,7 +130,7 @@ public class PLACEExperiment {
 			else
 				eval.print("HMM model - ");
 			eval.println();
-			eval.println(evaluatorRegression.evaluation().perTypeEvaluation("PLACE").precisionRecallEvaluation().toString());
+			eval.println(evaluatorRegression.evaluation().perTypeEvaluation(Configurator.chunkTypeForEvaluation).precisionRecallEvaluation().toString());
 		}
 		
 		
@@ -312,9 +311,14 @@ public class PLACEExperiment {
 		  PrintStream evaluationCRF = new PrintStream(new FileOutputStream(new File(path+"/../Place-NOM2-evaluation-results-crf.txt"))); 
 		  PrintStream annotationCRF = new PrintStream(new FileOutputStream(new File(path+"/../Place_CRF-Recognition-annotation-results-crf.txt")));
 		  */
-	 	  
-	 	  PrintStream evaluationCRF = new PrintStream(new FileOutputStream(new File(outputPR+"/Place-NOM2-evaluation-results-crf.txt"))); 
-		  PrintStream annotationCRF = new PrintStream(new FileOutputStream(new File(outputPR+"/Place_CRF-Recognition-annotation-results-crf.txt")));
+		  PrintStream evaluationCRF = null;
+	 	  if(Configurator.CLASSIFICATION){
+	 	  evaluationCRF = new PrintStream(new FileOutputStream(new File(outputPR+"/PlaceEvaluationCLASSIFICATION.txt")));
+		  }else{
+		  evaluationCRF = new PrintStream(new FileOutputStream(new File(outputPR+"/PlaceEvaluationDISAMBIGUATION.txt")));
+		  }
+		  PrintStream annotationCRF = new PrintStream(new FileOutputStream(new File(outputPR+"/PlaceEvaluationDISAMBIGUATION.txt")));
+		  
 	 	  
 		  PLACEConstants.init();
 		  PLACEConstants.candidatesPlaceSameDoc.clear();
@@ -334,11 +338,7 @@ public class PLACEExperiment {
 			  System.out.println("A entrar na desambiguacao");
 			  PLACERegressionDisambiguation.main(main);
 		  }
-		  /*
-		  testResolver(new File(path+"/../place.model.crf"), "/Users/vitorloureiro/Desktop/Geo-Temporal/geoModels/RegressionPlaceModel.svm", new File(path+"/../place-test.xml"), evaluationCRF, annotationCRF);
-		  */
 		  
-		  //testResolver(new File(outputPR+"/place.model.crf"), outputPR+"/RegressionPlaceModel.svm", new File(outputPR+"/place-test.xml"), evaluationCRF, annotationCRF);
 		  if(Configurator.DISAMBIGUATION){
 			  testResolver(new File(outputPR+"/place.model.crf"), outputPR+"/RegressionPlaceModel.svm", new File(outputPR+"/place-test.xml"), evaluationCRF, annotationCRF);
 		  }else{

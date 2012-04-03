@@ -86,12 +86,13 @@ public class GazetteerParser {
             Document doc = new Document();
             doc.add(new Field("eid", entity.id, Field.Store.YES, Field.Index.NOT_ANALYZED));
             doc.add(new Field("name", entity.name, Field.Store.YES, Field.Index.NO));
-            doc.add(new Field("wiki_title", entity.wiki_title, Field.Store.YES, Field.Index.NO));
+            //doc.add(new Field("wiki_title", entity.wiki_title, Field.Store.YES, Field.Index.NO));
             doc.add(new Field("text", entity.wiki_text, Field.Store.YES, Field.Index.ANALYZED));
             doc.add(new Field("coord", entity.coordinates, Field.Store.YES, Field.Index.NOT_ANALYZED));
             if (entity.population != null) doc.add(new Field("pop", entity.population, Field.Store.YES, Field.Index.NOT_ANALYZED));
             if (entity.area != null) doc.add(new Field("area", entity.area, Field.Store.YES, Field.Index.NOT_ANALYZED));
-            Set<String> altNames = getWikiAlternativesTo(entity.wiki_title);
+            //Set<String> altNames = getWikiAlternativesTo(entity.wiki_title);
+            Set<String> altNames = getWikiAlternativesTo(entity.name);
             if (altNames != null) {
                 for (String name : altNames) {
                     doc.add(new Field("altname", getNormalizedName(name), 
@@ -209,7 +210,7 @@ public class GazetteerParser {
                 lonew = null;
                 coordinate = null;
                 entity = new GazetteerEntry();
-                entity.wiki_title = attributes.getValue("wiki_title");
+                //entity.wiki_title = attributes.getValue("wiki_title");
                 entity.id = attributes.getValue("id");
                 entity.name = attributes.getValue("name");
             } else if (qName.equals("fact")) {
@@ -398,7 +399,12 @@ public class GazetteerParser {
 		char[] output = new char[512];
 		int outputPos;
 		final int maxSizeNeeded = 4 * length;
-		if (output.length < maxSizeNeeded) output = new char[ArrayUtil.getNextSize(maxSizeNeeded)];
+		
+		//if (output.length < maxSizeNeeded) output = new char[ArrayUtil.getNextSize(maxSizeNeeded)];
+		int [] testeArray = new int[maxSizeNeeded]; 
+		if (output.length < maxSizeNeeded) output = new char[maxSizeNeeded];
+		                                                     
+		
 		outputPos = 0;
 		for (int pos = 0 ; pos < length ; ++pos) {
 			final char c = input[pos];

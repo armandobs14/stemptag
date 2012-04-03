@@ -65,7 +65,8 @@ public class VincentyDistanceCalculator {
 		VincentyDistanceCalculator dist = new VincentyDistanceCalculator();
 		Position p1 = Position.fromDegrees(lat1, lon1);
 		Position p2 = Position.fromDegrees(lat2, lon2);
-                return dist.distance(p1,p2).getMetres() * 1000.0;
+                //return dist.distance(p1,p2).getMetres() * 1000.0;
+                return dist.distance(p1,p2).getMetres() / 1000.0;
 	}
 
 	public VincentyDistanceCalculator() {

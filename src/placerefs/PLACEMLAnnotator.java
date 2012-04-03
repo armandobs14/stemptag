@@ -31,13 +31,19 @@ public class PLACEMLAnnotator implements Chunker{
 
 	@Override
 	public Chunking chunk(char[] cs, int start, int end) {
+		System.out.println("ENTREI NO METODO CHUNK!!");
+		
 		String s = new String(cs,start,end);
 		List<GazetteerEntry> candidatos = new ArrayList<GazetteerEntry>();
 		GazetteerEntry bestCandidate;
 		ChunkingImpl chunks = new ChunkingImpl(s);
  	    Chunking chunking = chunker.chunk(cs,start,end);
  	    for ( Chunk chunk : chunking.chunkSet()) {
- 	    	if (chunk.type().equals("PLACE") && !(chunk instanceof NormalizedPLACEChunk)) {
+ 	    	
+ 	    	System.out.println("CHUNK TYPE: " + chunk.type());
+ 	    	System.out.println("IS CHUNK NOT A NORMALIZEDPLACE? : " + !(chunk instanceof NormalizedPLACEChunk));
+ 	    	
+ 	    	if (chunk.type().equals(placerefs.Configurator.chunkTypeForEvaluation) && !(chunk instanceof NormalizedPLACEChunk)) {
  	    		try {
 	 	    		String chunkText = s.substring(chunk.start(),chunk.end());
 	 	    		System.out.println("PLACE: "+chunkText);
@@ -46,7 +52,9 @@ public class PLACEMLAnnotator implements Chunker{
 	 	    		CandidateGenerator cg = new CandidateGenerator();               
 					candidatos = cg.getCandidates(chunkText);
 					//Compute best candidate
+					System.out.println("ANTES DO DISAMBIGUATE");
 					bestCandidate = PLACERegressionDisambiguation.disambiguate(chunkText, s, candidatos, regressionModel);
+					System.out.println("DEPOIS DO DISAMBIGUATE");
 					
 					place.setLatitude(Double.parseDouble(bestCandidate.coordinates.split(" ")[0].replaceAll("N|E|S|W", "")));
 					place.setLongitude(Double.parseDouble(bestCandidate.coordinates.split(" ")[1].replaceAll("N|E|S|W", "")));

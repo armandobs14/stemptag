@@ -51,7 +51,7 @@ public class ModelTraining {
 			int minFeatureCount = 1, priorBlockSize = 3, minEpochs = 10, maxEpochs = 5000;
 			double priorVariance = 4.0, initialLearningRate = 0.05, learningRateDecay = 0.995, minImprovement = 0.00001;
 			TagChunkCodec tagChunkCodec = new BioTagChunkCodec(factory,enforceConsistency);
-			ChainCrfFeatureExtractor<String> featureExtractor = new CRFFeatureExtractor(in.getParentFile().getParentFile().getAbsolutePath()+ "/../pos-en-general-brown.HiddenMarkovModel", true, true);
+			ChainCrfFeatureExtractor<String> featureExtractor = new CRFFeatureExtractor("models/POS/pos-en-general-brown.HiddenMarkovModel");
 			RegressionPrior prior = RegressionPrior.gaussian( priorVariance, uninformativeIntercept );
 			AnnealingSchedule annealingSchedule = AnnealingSchedule.exponential(initialLearningRate, learningRateDecay);
 	        Reporter reporter = Reporters.stdOut().setLevel(LogLevel.ERROR);
