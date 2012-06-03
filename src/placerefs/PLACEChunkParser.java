@@ -7,7 +7,13 @@ import com.aliasi.corpus.ObjectHandler;
 import com.aliasi.corpus.XMLParser;
 import com.aliasi.tokenizer.TokenizerFactory;
 import com.aliasi.xml.DelegatingHandler;
+
+
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import org.xml.sax.Attributes;
 import org.xml.sax.helpers.DefaultHandler;
@@ -69,6 +75,7 @@ public class PLACEChunkParser extends XMLParser<ObjectHandler> {
         int mEnd;
         final List<NormalizedPLACEChunk> mChunkList = new ArrayList<NormalizedPLACEChunk>();
         SentenceHandler() { }
+        
         @Override
         public void startDocument() {
             mBuf = new StringBuilder();
@@ -78,8 +85,20 @@ public class PLACEChunkParser extends XMLParser<ObjectHandler> {
         public void startElement(String uri, String localName, String qName, Attributes attributes) {
         	
         	if (attributes.getValue(0) != null && attributes.getValue(0).equals("true")){
+        		//limpa no inicio de cada documento
+        		System.out.println("candidatesPlaceSameDoc: " + PLACEConstants.candidatesPlaceSameDoc.size());
+        		System.out.println("bestCandidatePreviousPlaceSameDoc: " + PLACEConstants.bestCandidatePreviousPlaceSameDoc.size());
+        		
         		PLACEConstants.candidatesPlaceSameDoc.clear();
+        		PLACEConstants.bestCandidatePreviousPlaceSameDoc.clear();
+        		
         	}
+        	
+        	//TODO: VER COMO ITERAR PRIMEIRO SOBRE TODOS OS PLACES DO DOC ANTES DO PARSER
+        	System.out.println("getValue(0): " + attributes.getValue(0));
+    		System.out.println("form: " + attributes.getValue("form"));
+    		System.out.println("type: " + attributes.getValue("type"));
+        	
         	
             if (!"PLACE".equals(qName)) return;
             int size;
@@ -106,6 +125,9 @@ public class PLACEChunkParser extends XMLParser<ObjectHandler> {
             	if (attributes.getValue("latLong").replaceAll("�", "").split(" ")[1].toLowerCase().contains("w"))
             		lonAttribute = lonAttribute*(-1);
             	System.out.println("longitude: "+lonAttribute);
+            } else {
+            	latAttribute = null;
+            	lonAttribute = null;
             }
             
             placeTypeAttribute = attributes.getValue("type");
@@ -132,9 +154,60 @@ public class PLACEChunkParser extends XMLParser<ObjectHandler> {
         
         public Chunking getChunking() {
         	NormalizedPlaceChunking chunking = new NormalizedPlaceChunking(mBuf);
-            for (NormalizedPLACEChunk chunk : mChunkList)
-            		chunking.add(chunk);
+        	
+        	
+        	
+        	//TODO: ver cm fazer isto de maneira inteligente
+        	FileWriter fstream;
+			try {
+				fstream = new FileWriter("outputPlaceReferences/chunkings.xml", true);
+				BufferedWriter out = new BufferedWriter(fstream);
+	        	out.append("<chunking>\n");
+	        	out.append("\t<mBuf>");
+	        	out.append("<![CDATA["+mBuf+"]]>");
+	        	out.append("</mBuf>\n");
+	        	if(mChunkList.size()>0){
+		        	out.append("\t<chunks>\n");
+		        	for (NormalizedPLACEChunk chunk : mChunkList){
+		        		chunking.add(chunk);
+		        		out.append("\t\t<chunk>\n");
+		        		out.append("\t\t\t<end>"+chunk.end()+"</end>\n");
+		        		out.append("\t\t\t<start>"+chunk.start()+"</start>\n");
+		        		
+		        		out.append("\t\t\t<latitude>");
+		        		try{
+		        			out.append(Double.toString(chunk.getLatitude()));
+		        		}catch(NullPointerException npe){}
+		        		out.append("</latitude>\n");
+		        		
+		        		out.append("\t\t\t<longitude>");
+		        		try{
+		        			out.append(Double.toString(chunk.getLongitude()));
+		        		}catch(NullPointerException npe){}
+		        		out.append("</longitude>\n");
+		        		
+		        		
+		        		out.append("\t\t\t<placeType>"+chunk.getPlaceType()+"</placeType>\n");
+		        		out.append("\t\t\t<type>"+chunk.type()+"</type>\n");
+		        		out.append("\t\t\t<score>"+chunk.score()+"</score>\n");
+		        		out.append("\t\t</chunk>\n");		
+		        	}
+		        	out.append("\t</chunks>\n");
+	        	}
+	        	out.append("</chunking>\n");
+	        	out.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+        	
+        	
+        	
+        	
             
+            		
+            System.out.println("chunking: " + chunking.charSequence());
+            		
             return chunking;
         }
     }

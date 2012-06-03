@@ -38,6 +38,8 @@ public class PLACEMLAnnotator implements Chunker{
 		GazetteerEntry bestCandidate;
 		ChunkingImpl chunks = new ChunkingImpl(s);
  	    Chunking chunking = chunker.chunk(cs,start,end);
+
+ 	    
  	    for ( Chunk chunk : chunking.chunkSet()) {
  	    	
  	    	System.out.println("CHUNK TYPE: " + chunk.type());
@@ -46,20 +48,50 @@ public class PLACEMLAnnotator implements Chunker{
  	    	if (chunk.type().equals(placerefs.Configurator.chunkTypeForEvaluation) && !(chunk instanceof NormalizedPLACEChunk)) {
  	    		try {
 	 	    		String chunkText = s.substring(chunk.start(),chunk.end());
+	 	    		
 	 	    		System.out.println("PLACE: "+chunkText);
+	 	    		
 	 	    		NormalizedPLACEChunk place = new NormalizedPLACEChunk(chunk);
 	 	    		//Get candidates
-	 	    		CandidateGenerator cg = new CandidateGenerator();               
+	 	    		
+	 	    		
+	 	    		CandidateGenerator cg = new CandidateGenerator();   
 					candidatos = cg.getCandidates(chunkText);
+					
+					
+					
 					//Compute best candidate
 					System.out.println("ANTES DO DISAMBIGUATE");
 					bestCandidate = PLACERegressionDisambiguation.disambiguate(chunkText, s, candidatos, regressionModel);
 					System.out.println("DEPOIS DO DISAMBIGUATE");
 					
+					/*
+					System.out.println("candidatesPlaceSameDoc depois dis: " + PLACEConstants.candidatesPlaceSameDoc.size());
+					
+					System.out.println("bestCandidate Coordinates: " + bestCandidate.coordinates);
+					System.out.println("Double parseDouble: " + Double.parseDouble(bestCandidate.coordinates.split(" ")[0].replaceAll("N|E|S|W", "")));
+					*/
+					
 					place.setLatitude(Double.parseDouble(bestCandidate.coordinates.split(" ")[0].replaceAll("N|E|S|W", "")));
 					place.setLongitude(Double.parseDouble(bestCandidate.coordinates.split(" ")[1].replaceAll("N|E|S|W", "")));
+					/*
+					System.out.println("place latitude: " + place.getLatitude());
+					System.out.println("place longitude: " + place.getLongitude());
+					
+					System.out.println("place start: " + place.start());
+					System.out.println("place end: " + place.end());
+					*/
 					
 					chunks.add(place);
+					
+					//TESTE LUIS
+					/*for (Chunk chunk2 : chunks) {
+						if(chunk2.end() == place.end())
+							System.out.println("placeDentroFor: " + ((NormalizedPLACEChunk)chunk2).getLatitude());
+					}
+					*/
+					
+					
 					cg.close();
 					
  	    		} catch (Exception e) {
@@ -67,7 +99,21 @@ public class PLACEMLAnnotator implements Chunker{
 					e.printStackTrace();
 				}
  	    	} 
- 	    	else chunks.add(chunk);
+ 	    	else {
+ 	    		//TODO: RELEMBRAR PORQUE E QUE ISTO ESTAVA AQUI
+ 	    		NormalizedPLACEChunk npc = new NormalizedPLACEChunk(chunk);
+ 	    		try{
+ 	    			Double n = npc.getLatitude();
+ 	    			System.out.println("NOT NAM - Lat: " + n);
+ 	    			n = npc.getLongitude();
+ 	    			System.out.println("NOT NAM - Lon: " + n);
+ 	    			chunks.add(npc);
+ 	    		}
+ 	    		catch(NullPointerException e){
+ 	    			System.out.println("Apanhei NPE e vou passar a frente.");
+ 	    		}
+ 	    		
+ 	    	}
  	    }
  		return chunks;
 	}

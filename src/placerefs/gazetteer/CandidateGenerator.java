@@ -18,6 +18,8 @@ import org.apache.lucene.queryParser.*;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
+import org.apache.lucene.search.spell.SpellChecker;
+import org.apache.lucene.search.spell.SuggestWord;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.store.SimpleFSDirectory;
@@ -44,38 +46,70 @@ public class CandidateGenerator {
         		spellSearcher = new IndexSearcher(indexReaderSpell);*/
         	} else {
         		spellSearcher = new IndexSearcher(FSDirectory.open(new File(Configurator.LUCENE_KB_SPELLCHECK)), true);
+        		
+        		//Indice Velho
+//        		completeSearcher = new IndexSearcher(FSDirectory.open(new File(Configurator.LUCENE_KB_COMPLETE)), true);
+        		
+        		//Novo Indice
         		completeSearcher = new IndexSearcher(SimpleFSDirectory.open(new File(Configurator.LUCENE_KB_COMPLETE)), true);
+
         	}
-    		spellChecker = new SpellChecker(spellSearcher, "name", "eid");
-            //completeQueryParser = new QueryParser(Version.LUCENE_30, "eid", new KeywordAnalyzer());
+        	//Novo Indice
+    		spellChecker = new SpellChecker(FSDirectory.open(new File(Configurator.LUCENE_KB_SPELLCHECK)), "name", "eid", false);
     		completeQueryParser = new QueryParser(Version.LUCENE_35, "eid", new KeywordAnalyzer());
+    		
+        	//Indice Velho
+//    		spellChecker = new SpellChecker(spellSearcher, "name", "eid");
+//    		completeQueryParser = new QueryParser(Version.LUCENE_30, "eid", new KeywordAnalyzer());
+
+    		
+    		
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     public List<GazetteerEntry> getCandidates(String toponym) throws Exception {
-	System.out.println("toponym candidate generation: " + toponym);
-
-        List<SuggestWord> candidates = spellChecker.suggestSimilar(QueryParser.escape(toponym), Configurator.MAX_NAME_SUGGESTIONS);
-        Set<String> antiDuplicates = new HashSet<String>();
+    	System.out.println("toponym candidate generation: " + toponym);
+    	
+    	//Novo Indice    	
+		Set<Integer> candidates = spellChecker.suggestSimilar(QueryParser.escape(toponym), Configurator.MAX_NAME_SUGGESTIONS);
+		
+//		System.out.println("candidates n: " + candidates.size());
+//        for(int i = 1; i < candidates.size(); i++){
+//    		System.out.println("candidate " + i + ": " + candidates.get(i-0).eid);
+//        }
+		
+    	//Indice Velho
+//    	List<SuggestWord> candidates = spellChecker.suggestSimilar(QueryParser.escape(toponym), Configurator.MAX_NAME_SUGGESTIONS);
+		
+        Set<Integer> antiDuplicates = new HashSet<Integer>();
         List<GazetteerEntry> result = new ArrayList<GazetteerEntry>();
-        for (SuggestWord candidate : candidates) {
-            if (antiDuplicates.contains(candidate.eid)) {
+        
+        //Indice Velho
+//        for (SuggestWord candidate : candidates) {
+        //Indice Novo
+        for (Integer candidate : candidates) {
+            if (antiDuplicates.contains(candidate)) {
                 continue;
             } else {
-                antiDuplicates.add(candidate.eid);
+            	//Indice Novo
+                antiDuplicates.add(candidate);
+                //Indice Velho
+//                antiDuplicates.add(Integer.getInteger(candidate.eid));
             }
             
-            System.out.println("CEID: " + candidate.eid + " Name:" + candidate.string);
+            //System.out.println("CEID: " + candidate.eid + " Name:" + candidate.string);
             
-            Query query = completeQueryParser.parse(candidate.eid);
+            Query query = completeQueryParser.parse(candidate.toString());
+            
+//            Document d = completeSearcher.getIndexReader().document(new Integer(candidate.eid));
             
             ScoreDoc[] hits = completeSearcher.search(query, 1).scoreDocs;
             Document d = completeSearcher.doc(hits[0].doc);
             GazetteerEntry c = new GazetteerEntry();
             
-            //System.out.println("pop: " + d.get("pop"));
+            
             
             c.id = d.get("eid");
             c.name = d.get("name");
@@ -85,10 +119,17 @@ public class CandidateGenerator {
             
             
             c.wiki_text = d.get("text");
-            c.altNames = d.getValues("altname");
+            
+            c.altNames = new String[]{};
+
+//            d.getValues("altname");
             c.coordinates = d.get("coord");
-            c.area = d.get("area");
-            c.population = d.get("pop");
+            
+            c.area = null;
+            c.population = null;
+//            c.area = d.get("area");
+            
+//            c.population = d.get("pop");
             
             result.add(c);
         }

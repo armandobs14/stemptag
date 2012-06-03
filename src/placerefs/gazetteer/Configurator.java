@@ -19,7 +19,8 @@ public final class Configurator {
     
     /** The path to the lucene base path. **/
     //public static final String LUCENE_KB = "/media/sda3/IndiceLucene400k/";
-    public static final String LUCENE_KB = "ConfigurationFiles/IndiceLucene40k/";
+//    public static final String LUCENE_KB = "ConfigurationFiles/IndiceLucene40k/";
+    public static final String LUCENE_KB = "ConfigurationFiles/IndiceLucene400k/";
     
     /** The path to the lucene index for the KB entities content. **/
     public static final String LUCENE_KB_COMPLETE = LUCENE_KB + "kb-content";
@@ -33,7 +34,8 @@ public final class Configurator {
     
     
     
-    public static final int MAX_NAME_SUGGESTIONS = 10;
+    public static final int MAX_NAME_SUGGESTIONS = 30;
+    public static final int LIM_MAX_CANDIDATES_FEATURES = 10;
 
     public static final boolean INDEX = false;
 

@@ -20,7 +20,7 @@ public class NormalizedPlaceChunkerEvaluator implements ObjectHandler<Chunking> 
 	
 	public void handle(Chunking referenceChunking) {
         CharSequence cSeq = referenceChunking.charSequence();
-
+        
 
         // first-best
         Chunking firstBestChunking  = mChunker.chunk(cSeq);

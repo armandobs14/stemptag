@@ -9,6 +9,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.xpath.*;
@@ -27,6 +29,7 @@ import org.xml.sax.SAXException;
 
 
 import placerefs.PLACEChunkParser;
+import placerefs.gazetteer.GazetteerEntry;
 import temporal.rules.TIMEXRuleAnnotator;
 import temporal.CRFFeatureExtractor;
 import com.aliasi.chunk.BioTagChunkCodec;
@@ -56,9 +59,9 @@ public class PLACEExperiment {
 	private static String outputPR = "outputPlaceReferences";
 	
 	public static void trainResolver(File in, File out) throws Exception {
-		boolean crf = out.getAbsolutePath().endsWith(".crf");
+		//boolean crf = out.getAbsolutePath().endsWith(".crf");
 		Parser parser = new PLACEChunkParser();
-		if (crf) {
+		if (Configurator.clasModel.equals("CRF")) {
 			TokenizerFactory factory = new IndoEuropeanTokenizerFactory();
 			boolean enforceConsistency = true, cacheFeatures = true, addIntercept = true, uninformativeIntercept = true;
 			int minFeatureCount = 1, priorBlockSize = 3, minEpochs = 10, maxEpochs = 5000;
@@ -77,7 +80,9 @@ public class PLACEExperiment {
 					annealingSchedule, minImprovement, minEpochs, maxEpochs,
 					reporter);
 			AbstractExternalizable.serializeTo(chunker, out);
-		} else {
+		}else if(Configurator.clasModel.equals("RSW")){
+			
+		}else {
 			int MAX_N_GRAM = 8, NUM_CHARS = 256;
 			double LM_INTERPOLATION = MAX_N_GRAM;
 			TokenizerFactory factory = new IndoEuropeanTokenizerFactory();
@@ -120,6 +125,7 @@ public class PLACEExperiment {
 		if(Configurator.DISAMBIGUATION){
 			NormalizedPlaceChunkerEvaluator evaluatorRegression = new NormalizedPlaceChunkerEvaluator(new PLACEMLAnnotator(chunker,regressionModel));
 			evaluatorRegression.setVerbose(false);
+			//evaluatorRegression.setVerbose(true);
 			Parser parserRegression = new PLACEChunkParser();
 			parserRegression.setHandler(evaluatorRegression);
 			parserRegression.parse(data);
@@ -163,6 +169,33 @@ public class PLACEExperiment {
 				System.out.println("Texto:"+txt);
 				Chunk[] chunking = chunker.chunk(txt).chunkSet().toArray(new Chunk[0]);
 				int lastPos = 0;
+				/*
+				//TODO: TESTE LUIS
+				for (int luisPrgrph = 0; luisPrgrph < paragraphs.getLength(); luisPrgrph++) {
+					String txtLuis = xpath.compile(".").evaluate(paragraphs.item(luisPrgrph));
+					Chunk[] chunkingLuis = chunker.chunk(txtLuis).chunkSet().toArray(new Chunk[0]);
+					int lastPosLuis = 0;
+					
+					for (int luisPLACE = 0; luisPLACE < chunking.length; luisPLACE++) {
+						NormalizedPLACEChunk place = (NormalizedPLACEChunk)chunking[luisPLACE];
+						int start = place.start();
+						int end = place.end();
+						String chunkText = txt.substring(start,end);
+						System.out.println("PlaceText: "+chunkText);
+		 	    	
+		 	            System.out.println(chunkText+"#");
+		 	        
+		 	            out.print(txt.substring(lastPos, start));
+						out.print("<PLACE");
+		 	        	    
+						out.print(">");
+						out.print(chunkText);
+						out.print("</PLACE>");
+		 	 	        lastPos = end;
+					}
+				}
+				*/
+				
 				//For each PLACE
 				for (int k = 0; k < chunking.length; k++) {
 					NormalizedPLACEChunk place = (NormalizedPLACEChunk)chunking[k];
@@ -212,21 +245,19 @@ public class PLACEExperiment {
 		
 		File existeTrain = new File(outputPR+"/place-train.xml");
 		if(!existeTrain.exists()){
-			
-		
-		PrintWriter test = new PrintWriter(new FileWriter(outputPR+"/place-test.xml"));
-		PrintWriter train = new PrintWriter(new FileWriter(outputPR+"/place-train.xml"));
-		File files[] = new File(path).listFiles();
-		int split = (int)((double)files.length * ((double)percent / 100.0));
-		System.out.println(split);
-		 
-		test.println("<corpus>");
-		train.println("<corpus>");
-		//See which corpus to use
-		if (path.contains("mitre_spatialml"))
-			System.out.println("mitre_spatialml_Corpus");
-		else
-			System.out.println("LGL_Corpus");
+			PrintWriter test = new PrintWriter(new FileWriter(outputPR+"/place-test.xml"));
+			PrintWriter train = new PrintWriter(new FileWriter(outputPR+"/place-train.xml"));
+			File files[] = new File(path).listFiles();
+			int split = (int)((double)files.length * ((double)percent / 100.0));
+			System.out.println(split);
+			 
+			test.println("<corpus>");
+			train.println("<corpus>");
+			//See which corpus to use
+			if (path.contains("mitre_spatialml"))
+				System.out.println("mitre_spatialml_Corpus");
+			else
+				System.out.println("LGL_Corpus");
 			
 			for (int pos = 1 ; pos < files.length ; pos++ ) {
 				PrintWriter out = ( pos < split ) ? train : test;
@@ -312,64 +343,40 @@ public class PLACEExperiment {
 		  PrintStream annotationCRF = new PrintStream(new FileOutputStream(new File(path+"/../Place_CRF-Recognition-annotation-results-crf.txt")));
 		  */
 		  PrintStream evaluationCRF = null;
-	 	  if(Configurator.CLASSIFICATION){
-	 	  evaluationCRF = new PrintStream(new FileOutputStream(new File(outputPR+"/PlaceEvaluationCLASSIFICATION.txt")));
-		  }else{
-		  evaluationCRF = new PrintStream(new FileOutputStream(new File(outputPR+"/PlaceEvaluationDISAMBIGUATION.txt")));
-		  }
+	 	  if(Configurator.CLASSIFICATION)
+	 		  evaluationCRF = new PrintStream(new FileOutputStream(new File(outputPR+"/PlaceEvaluationCLASSIFICATION.txt")));
+		  else
+			  evaluationCRF = new PrintStream(new FileOutputStream(new File(outputPR+"/PlaceEvaluationDISAMBIGUATION.txt")));
+		  
 		  PrintStream annotationCRF = new PrintStream(new FileOutputStream(new File(outputPR+"/PlaceEvaluationDISAMBIGUATION.txt")));
 		  
 	 	  
 		  PLACEConstants.init();
 		  PLACEConstants.candidatesPlaceSameDoc.clear();
-	//	  trainResolver(new File(path+"/../place-train.xml"),new File(path+"/../place.model.crf"));
 		  
 		  if(Configurator.CLASSIFICATION){
 			  File modeloCRF = new File(outputPR+"/place.model.crf"); 
 			  if(!modeloCRF.exists()){
-				  System.out.println("ENTREII!!!");
+				  System.out.println("Training Classifier..");
 				  trainResolver(new File(outputPR+"/place-train.xml"),new File(outputPR+"/place.model.crf"));
 			  }
 		  }
-	//    String main[] = {path+"/../place-train.xml"};
 		  
 		  if(Configurator.DISAMBIGUATION){
 			  String main[] = {outputPR+"/place-train.xml"};
-			  System.out.println("A entrar na desambiguacao");
+			  System.out.println("Training Disambiguator..");
 			  PLACERegressionDisambiguation.main(main);
 		  }
 		  
 		  if(Configurator.DISAMBIGUATION){
 			  testResolver(new File(outputPR+"/place.model.crf"), outputPR+"/RegressionPlaceModel.svm", new File(outputPR+"/place-test.xml"), evaluationCRF, annotationCRF);
+			  //testResolver(new File(outputPR+"/place.model.crf"), outputPR+"/RegressionPlaceModel.svm", new File(outputPR+"/place-train.xml"), evaluationCRF, annotationCRF);
 		  }else{
 			  testResolver(new File(outputPR+"/place.model.crf"), "", new File(outputPR+"/place-test.xml"), evaluationCRF, annotationCRF);
 		  }
 		  
-		  
 		  evaluationCRF.close(); 
 		  annotationCRF.close();
-		
-	/*	HashSet<String> placeNames = new HashSet<String>();
-		File files[] = new File(path).listFiles();
-		System.out.println(files.length);
-		
-		for (int pos = 1 ; pos < files.length ; pos++ ) {
-	    	BufferedReader reader = new BufferedReader(new FileReader(files[pos]));
-	    	String aux;
-	    	while ((aux=reader.readLine())!=null) 
-	    		if(aux.trim().length() > 0){ 
-	    			placeNames.add(aux.toLowerCase().trim());
-	    		}
-		}
-		
-		
-		FileOutputStream fo = new FileOutputStream("/Users/vitorloureiro/Desktop/Geo-Temporal/PlaceWordsList.lex");  
-        ObjectOutputStream oo=new ObjectOutputStream(fo);          
-        oo.writeObject(placeNames);   
-        oo.close();*/
-		
-		  
-	
 	}
 
 }

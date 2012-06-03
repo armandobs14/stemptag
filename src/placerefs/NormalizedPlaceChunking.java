@@ -1,5 +1,6 @@
 package placerefs;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -13,7 +14,7 @@ import com.aliasi.chunk.ChunkingImpl;
 import com.aliasi.util.Iterators;
 import com.aliasi.util.Strings;
 
-public class NormalizedPlaceChunking implements Chunking, Iterable<Chunk> {
+public class NormalizedPlaceChunking implements Chunking, Iterable<Chunk>{
 
 	private final String mString;
     private final Set<NormalizedPLACEChunk> mChunkSet = new LinkedHashSet<NormalizedPLACEChunk>();

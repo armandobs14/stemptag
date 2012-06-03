@@ -1,0 +1,217 @@
+<project name="TIMEX Demo" default="compile" basedir=".">
+
+  <property name="app.name" value="timex-demo"/>
+  <property name="manager.url" value="http://localhost:8080/manager/" />
+  <property name="manager.username" value="admin"/>
+  <property name="manager.password" value="admin"/>
+  <property name="appengine.username" value="luissantos88@gmail.com"/>
+  <!--<property name="appengine.sdk.dir" location="/home/luis/.eclipse/org.eclipse.platform_3.7.0_155965261/plugins/com.google.appengine.eclipse.sdkbundle_1.4.3.v201103311225/appengine-java-sdk-1.4.3" /> -->
+  
+
+  <path id="classpath.standard">
+    <pathelement location="/usr/share/java/lingpipe.jar"/>
+    <pathelement location="/usr/share/java/commons-fileupload.jar"/>
+    <pathelement location="/usr/share/java/commons-io.jar" />  <!-- is anyone using this? -->
+    <pathelement location="/usr/share/java/nekohtml.jar" />
+    <pathelement location="/usr/share/java/servlet-api.jar" />
+    <pathelement location="/usr/share/java/weka.jar"/>
+    <pathelement location="/usr/share/java/snowball.jar"/>
+    <pathelement location="/usr/share/java/joda-time.jar"/>
+    <pathelement location="/usr/share/java/ngramj.jar"/>
+    <pathelement location="/usr/share/java/xml-apis.jar" />
+    <pathelement location="/usr/share/java/xercesImpl.jar" />
+    <pathelement location="/usr/share/java/lucene-core-3.1.0.jar" />
+  	<pathelement location="/usr/share/java/lucene-core-3.1.0-javadoc.jar" />
+    <pathelement location="/usr/share/java/jts.jar" />
+    <pathelement location="bin"/>
+    <fileset dir="${appengine.sdk.dir}/lib"><include name="shared/**/*.jar" /></fileset>
+	<pathelement location="${appengine.sdk.dir}/lib/appengine-tools-api.jar" />
+   </path>
+
+  <target name="clean">
+	<delete file="${app.name}.jar"/>
+    <delete file="${app.name}.war"/>
+  	<delete dir="war"/>
+    <delete dir="bin"/>
+    <mkdir dir="bin"/>
+  </target>
+
+  <target name="compile">
+    <mkdir dir="bin"/>
+    <javac includeAntRuntime="false" srcdir="src" destdir="bin" debug="yes" deprecation="yes" optimize="yes">
+      <compilerarg value="-Xlint:all"/>
+      <classpath refid="classpath.standard"/>
+    </javac>
+  </target>
+
+  <target name="jar" depends="compile">
+    <jar destfile="${app.name}.jar">
+	  <fileset dir="src" includes="**/*"/>
+      <fileset dir="bin" includes="**/*.class"/>
+    </jar>
+  </target>
+
+  <target name="models">
+    <mkdir dir="models"/>
+	<get src="http://alias-i.com/lingpipe/demos/models/pos-en-general-brown.HiddenMarkovModel" dest="models/pos-en-general-brown.HiddenMarkovModel"/>
+  	<get src="http://www.timexportal.info/local\-\-files/wikiwars/WikiWars_20101004.zip" dest="models/wikiwars.zip" />
+	<get username="bgmartins" password="DaVinci" src="http://www.tycho.iel.unicamp.br/~tycho/corpus/texts/pos.zip" dest="models/pos.zip"/>
+    <java classname="temporal.TrainPOSTagger" fork="true">
+       <classpath refid="classpath.standard"/>
+       <arg value="models/pos.zip"/>
+       <arg value="models/pos-pt-general-TychoBrahe.HiddenMarkovModel"/>
+    </java>
+  </target>
+
+  <target name="client" depends="jar">
+    <java classname="temporal.web.TIMEXClient" fork="true">
+       <classpath refid="classpath.standard"/>
+       <arg value="-serverUrl=http://localhost:8080/timex-demo/timex/response.xml"/>
+       <arg value="-inputFile=temp.txt"/>
+       <arg value="-outputFile=temp.out.txt"/>
+    </java>
+	<delete file="${app.name}.jar"/>
+  </target>
+
+  <target name="war" depends="jar,models">
+    <mkdir dir="war"/>
+    <copy todir="war"><fileset dir="webapp"/></copy>
+  	<mkdir dir="war/WEB-INF/lib"/>
+    <copy todir="war/WEB-INF/lib">
+        <mkdir dir="war/WEB-INF/classes"/>
+    <mkdir dir="war/WEB-INF/classes/META-INF"/>
+    <copy todir="war/WEB-INF/classes/META-INF" file="webapp/WEB-INF/jdoconfig.xml" />
+  	<copy todir="war/WEB-INF/classes">
+  	  <fileset dir="src" includes="**/*"/>
+	  <fileset dir="bin" includes="**/*"/>
+    </copy>
+      <fileset file="${app.name}.jar"/>
+      <fileset file="/usr/share/java/lingpipe.jar"/>
+      <fileset file="/usr/share/java/commons-fileupload.jar"/>
+      <fileset file="/usr/share/java/commons-io.jar"/>
+      <fileset file="/usr/share/java/nekohtml.jar"/>
+      <fileset file="/usr/share/java/xml-apis.jar"/>
+      <fileset file="/usr/share/java/weka.jar"/>
+      <fileset file="/usr/share/java/joda-time.jar"/>
+      <fileset file="/usr/share/java/snowball.jar"/>
+      <fileset file="/usr/share/java/ngramj.jar"/>
+ 	  <fileset file="/usr/share/java/xercesImpl.jar"/>
+      <fileset file="/usr/share/java/lucene-core-3.1.0.jar"/>
+    	<fileset file="/usr/share/java/lucene-core-3.1.0-javadoc.jar"/>
+      <fileset file="/usr/share/java/jts.jar"/>
+    </copy>
+    <jar destfile="war/WEB-INF/lib/models.jar">
+      <fileset dir="." includes="models/pos-en-general-brown.HiddenMarkovModel" />
+      <fileset dir="." includes="models/pos-pt-general-TychoBrahe.HiddenMarkovModel" />
+    </jar>
+    <jar destfile="${app.name}.war">
+      <fileset dir="war"/>
+    </jar>
+  	<delete dir="war"/>
+  	<!--<delete dir="models"/>-->
+  	<delete file="${app.name}.jar"/>
+  </target>
+
+  <target name="deploy" depends="war">
+    <taskdef name="deploy" classname="org.apache.catalina.ant.DeployTask">
+        <classpath>
+           <pathelement location="/usr/share/java/catalina-ant.jar"/>
+        </classpath>
+    </taskdef>
+    <deploy url="${manager.url}" 
+            username="${manager.username}" 
+            password="${manager.password}" 
+            path="/${app.name}" 
+            war="${app.name}.war"/>
+	<delete file="${app.name}.war"/>
+  </target>
+
+  <target name="undeploy">
+    <taskdef name="undeploy" classname="org.apache.catalina.ant.UndeployTask">
+        <classpath>
+           <pathelement location="/usr/share/java/catalina-ant.jar"/>
+        </classpath>
+    </taskdef>
+    <undeploy url="${manager.url}" username="${manager.username}" password="${manager.password}" path="/${app.name}"/>
+  </target>
+
+  <target name="redeploy" depends="undeploy,deploy"/>
+  
+    <import file="${appengine.sdk.dir}/config/user/ant-macros.xml" />
+
+  <target name="datanucleusenhance" depends="war" description="Performs JDO enhancement on compiled data classes.">
+		    <enhance_war war="war" />
+  </target>
+
+  <target name="runserver" depends="datanucleusenhance" description="Starts the development server.">
+		    <dev_appserver war="war" port="8888" />
+  </target>
+
+  <target name="update" depends="datanucleusenhance" description="Uploads the application to App Engine.">
+		<java classname="com.google.appengine.tools.admin.AppCfg">
+	  	 	<sysproperty key="appengine.sdk.root" value="${appengine.sdk.dir}" />
+	        <classpath refid="classpath.standard"/>
+	  	    <arg value="--email=${appengine.username}" />
+	  	    <arg value="update" />
+	  	    <arg value="war" />
+	  	 </java>	
+  </target>
+
+  <target name="update_indexes" depends="datanucleusenhance" description="Uploads just the datastore index configuration to App Engine.">
+		    <appcfg action="update_indexes" war="war" />
+  </target>
+
+  <target name="rollback" depends="datanucleusenhance" description="Rolls back an interrupted application update.">
+	     <appcfg action="rollback" war="war" />
+  </target>
+
+  <target name="request_logs" description="Downloads log data from App Engine for the application.">
+		    <appcfg action="request_logs" war="war">
+		      <options><arg value="--num_days=5"/></options>
+		      <args><arg value="logs.txt"/></args>
+		    </appcfg>
+  </target>
+	
+  <target name="luceneindex" description="Creates and deploys the lucene index for the gazetteer">
+	<java classname="org.apache.gaelucene.tools.LuceneIndexPushUtil">
+        <classpath refid="classpath.standard"/>
+  	    <arg value="-app-url" />
+	    <arg value="http://stemptag.appspot.com/gaelucenedashboard" />
+  	    <arg value="-auth-cookie" />
+	    <arg value="ahlogincookie=${appengine.username}:false:12093021971246851751" />
+  	    <arg value="-src" />
+	    <arg value="ConfigurationFiles/IndiceLucene/kb-names" />
+  	    <arg value="-cat" />
+	    <arg value="ConfigurationFiles/IndiceLucene/kb-names" />
+	    <arg value="-rec-file" />
+  	    <arg value="ConfigurationFiles/IndiceLucene/uploaded.rec" />
+  	 </java>
+ 	 <java classname="org.apache.gaelucene.tools.LuceneIndexPushUtil">
+        <classpath refid="classpath.standard"/>
+  	    <arg value="-app-url" />
+	    <arg value="http://stemptag.appspot.com/gaelucenedashboard" />
+  	    <arg value="-auth-cookie" />
+	    <arg value="ahlogincookie=${appengine.username}:false:12093021971246851751" />
+  	    <arg value="-src" />
+	    <arg value="ConfigurationFiles/IndiceLucene/kb-content" />
+  	    <arg value="-cat" />
+	    <arg value="ConfigurationFiles/IndiceLucene/kb-content" />
+	    <arg value="-rec-file" />
+  	    <arg value="ConfigurationFiles/IndiceLucene/uploaded.rec" />
+  	 </java>  	
+	 <java classname="org.apache.gaelucene.tools.LuceneIndexPushUtil">
+        <classpath refid="classpath.standard"/>
+  	    <arg value="-app-url" />
+	    <arg value="http://stemptag.appspot.com/gaelucenedashboard" />
+  	    <arg value="-auth-cookie" />
+	    <arg value="ahlogincookie=${appengine.username}:false:12093021971246851751" />
+  	    <arg value="-src" />
+	    <arg value="ConfigurationFiles/IndiceLucene/kb-spell" />
+  	    <arg value="-cat" />
+	    <arg value="ConfigurationFiles/IndiceLucene/kb-spell" />
+	    <arg value="-rec-file" />
+  	    <arg value="ConfigurationFiles/IndiceLucene/uploaded.rec" />
+  	 </java>
+  </target>
+  
+</project>

@@ -1,5 +1,6 @@
 package placerefs;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 import org.joda.time.Interval;
@@ -64,6 +65,14 @@ public class NormalizedPLACEChunk implements Chunk {
 	@SuppressWarnings("deprecation")
 	@Override
 	public boolean equals ( Object that ) {
+		
+		System.out.println("that instanceof NormalizedPLACEChunk: " + (that instanceof NormalizedPLACEChunk));
+		System.out.println("this.latitude: " + this.latitude);
+		System.out.println("this.longitude: " + this.longitude);
+		System.out.println("that.latitude: " + ((NormalizedPLACEChunk)that).getLatitude());
+		System.out.println("that.longitude: " + ((NormalizedPLACEChunk)that).getLongitude());
+		System.out.println("this.latitude != null && this.longitude != null: " + (this.latitude != null && this.longitude != null));
+		
 		if (that instanceof NormalizedPLACEChunk){
 			if (this.latitude != null && this.longitude != null){
 				Point p1 = new Point(new Coordinate(longitude,latitude), new PrecisionModel(),4326);
@@ -72,10 +81,10 @@ public class NormalizedPLACEChunk implements Chunk {
 											   this.placeType.toLowerCase().equals("continent") || 
 											   this.placeType.toLowerCase().equals("country") ||
 											   this.placeType.toLowerCase().equals("state"))){
-					return ((p1.distance(p2) < 5) && ((NormalizedPLACEChunk) that).start() == this.start() && ((NormalizedPLACEChunk) that).end() == this.end());
+					return ((NormalizedPLACEChunk) that).start() == this.start() && ((NormalizedPLACEChunk) that).end() == this.end() && ((p1.distance(p2) < 5));
 				}
 				else
-					return ((p1.distance(p2) < 1) && ((NormalizedPLACEChunk) that).start() == this.start() && ((NormalizedPLACEChunk) that).end() == this.end());
+					return ((NormalizedPLACEChunk) that).start() == this.start() && ((NormalizedPLACEChunk) that).end() == this.end() && ((p1.distance(p2) < 1));
 			}
 			else
 				return false;

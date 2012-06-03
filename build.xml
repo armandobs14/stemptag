@@ -1,0 +1,79 @@
+<project name="stemptag" default="run-SML" basedir=".">
+    
+	<property name="app.name" value="stemptag"/>
+	<property name="datasetSML" value="ConfigurationFiles/mitre_spatialml"/>
+	<property name="datasetLGL" value="ConfigurationFiles/LGL"/>
+	
+	<path id="classpath.standard">
+	    <pathelement location="lib/lingpipe.jar"/>
+	    <pathelement location="lib/commons-fileupload.jar"/>
+	    <pathelement location="lib/commons-io.jar" />  <!-- is anyone using this? -->
+	    <pathelement location="lib/nekohtml.jar" />
+	    <pathelement location="/usr/share/java/servlet-api.jar" />
+	    <pathelement location="lib/weka-3_6_0.jar" />
+<!--	    <pathelement location="lib/weka-3_4_4.jar"/>-->
+	    <pathelement location="lib/lucene-snowball.jar"/>
+	    <pathelement location="lib/joda-time.jar"/>
+	    <pathelement location="lib/ngramj.jar"/>
+	    <pathelement location="/usr/share/java/xml-apis.jar" />
+	    <pathelement location="/usr/share/java/xercesImpl.jar" />
+	    <pathelement location="lib/lucene-core-3.5.0.jar" />
+	    <pathelement location="lib/lucene-core-3.5.0-javadoc.jar" />
+	    <pathelement location="lib/jts.jar" />
+	    <pathelement location="lib/jtsio.jar" />
+	    <!--<pathelement location="lib/lucene-spellchecker.jar" />-->
+	    <pathelement location="bin"/>
+	</path>
+	
+	
+	<target name="clean" description="remove intermediate files">
+		<delete dir="bin"/>
+    </target>
+	
+    <target name="compile" depends="clean" description="compile the Java source code to class files">
+    	<mkdir dir="bin"/>
+
+    	<javac includeAntRuntime="false" srcdir="src" destdir="bin" debug="yes" deprecation="yes" optimize="yes">
+    		<compilerarg value="-Xlint:all"/>
+    		<classpath refid="classpath.standard"/>
+    	</javac>
+    </target>
+	
+    <target name="jar" depends="compile" description="create a Jar file for the application">
+    	<jar destfile="${app.name}.jar">
+		  <fileset dir="src" includes="**/*"/>
+	      <fileset dir="bin" includes="**/*.class"/>
+	    </jar>
+    </target>
+	
+	<target name="run-SML" depends="compile">
+		<record name="outputPLACER.txt" action="start" />
+		<java classname="placerefs.PLACEExperiment" maxmemory="1024m">
+			<classpath refid="classpath.standard"/>
+			<jvmarg value="-Xmx1024m" />
+			<arg value="${datasetSML}"/>
+		</java>
+		<record name="outputPLACER.txt" action="stop" />
+	</target>
+	
+	<target name="run-LGL" depends="compile">
+		<java classname="placerefs.PLACEExperiment" maxmemory="1024m">
+			<classpath refid="classpath.standard"/>
+			<jvmarg value="-Xmx1024m" />
+			<arg value="${datasetLGL}"/>
+		</java>
+	</target>
+
+	<target name="run-RSW" depends="compile">
+		<record name="outputPLACE_TESTE_RSW.txt" action="start" />
+		<java classname="placerefs.PLACEClassificationRSW" maxmemory="1024m">
+			<classpath refid="classpath.standard"/>
+			<jvmarg value="-Xmx1024m" />
+			<arg value="outputPlaceReferences/place-train.xml"/>
+		</java>
+		<record name="outputPLACE_TESTE_RSW.txt" action="stop" />
+
+	</target>
+
+	
+</project>

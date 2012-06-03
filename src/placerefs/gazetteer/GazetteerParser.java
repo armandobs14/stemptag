@@ -20,6 +20,8 @@ import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.search.spell.LuceneDictionary;
+import org.apache.lucene.search.spell.SpellChecker;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.ArrayUtil;
@@ -69,8 +71,15 @@ public class GazetteerParser {
             IndexReader iReader = IndexReader.open(namesDirectory, true);
             File luceneSpellIndex = new File(Configurator.LUCENE_KB_SPELLCHECK);
             Directory luceneSpellDirectory = FSDirectory.open(luceneSpellIndex);
-            spellchecker = new SpellChecker(luceneSpellDirectory, "name", "eid");
+            //Novo Indice
+            spellchecker = new SpellChecker(FSDirectory.open(new File(Configurator.LUCENE_KB_SPELLCHECK)), "name", "eid", false);
+            
+            //Velho Indice
+//            spellchecker = new SpellChecker(luceneSpellDirectory, "name", "eid");
+            
+            
             spellchecker.indexDictionary(new LuceneDictionary(iReader));
+            
             spellchecker.close();
             luceneSpellDirectory.close();
             iReader.close();

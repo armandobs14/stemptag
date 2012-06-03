@@ -1,5 +1,6 @@
 package placerefs;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -11,6 +12,7 @@ import com.aliasi.chunk.Chunking;
 import com.aliasi.chunk.ChunkingEvaluation;
 import com.aliasi.chunk.ChunkingImpl;
 import com.aliasi.classify.PrecisionRecallEvaluation;
+import com.aliasi.util.Pair;
 import com.aliasi.util.Strings;
 
 public class NormalizedPlaceChunkingEvaluation extends ChunkingEvaluation{
@@ -138,9 +140,48 @@ public class NormalizedPlaceChunkingEvaluation extends ChunkingEvaluation{
 		
 		mCases.add(new Chunking[] { referenceChunking, responseChunking });
 		// need mutable sets, so wrap
-		Set<NormalizedPLACEChunk> refSet = unscoredNormalizedChunkSet(referenceChunking);
-		Set<NormalizedPLACEChunk> respSet = unscoredNormalizedChunkSet(responseChunking);
+		Set<NormalizedPLACEChunk> refSetComNulls = unscoredNormalizedChunkSet(referenceChunking);
+		Set<NormalizedPLACEChunk> respSetComNulls = unscoredNormalizedChunkSet(responseChunking);
+		
+		Set<NormalizedPLACEChunk> refSet = new HashSet<NormalizedPLACEChunk>();
+		Set<NormalizedPLACEChunk> respSet = new HashSet<NormalizedPLACEChunk>();
+		
+		ArrayList<Pair<Integer, Integer>> chunksARemoverDoRespSet = new ArrayList<Pair<Integer, Integer>>(); 
 
+		System.out.println("#########refSet############");
+		
+		for (NormalizedPLACEChunk npc : refSetComNulls) {
+			try{
+				System.out.println("start: " + npc.start() + " end: " + npc.end() + " lat: " + npc.getLatitude() + " lon: " + npc.getLongitude());
+				refSet.add(npc);
+			}
+			catch(NullPointerException npe){
+				System.out.println("a retirar ref sem coords");
+				chunksARemoverDoRespSet.add(new Pair<Integer, Integer>(npc.start(), npc.end()));
+			}
+		}
+		refSetComNulls.clear();
+		System.out.println("###########################");
+		
+		System.out.println("#########respSet############");
+		for (NormalizedPLACEChunk npc : respSetComNulls) {
+			boolean adicionar = true;
+			for (Pair<Integer, Integer> pair : chunksARemoverDoRespSet) {
+				if(npc.start()==pair.a() && npc.end()==pair.b()){
+					System.out.println("a retirar resp de chunk sem coords");
+					adicionar=false;
+					break;
+				}
+			}
+			if(adicionar){
+				System.out.println("start: " + npc.start() + " end: " + npc.end() + " lat: " + npc.getLatitude() + " lon: " + npc.getLongitude());
+				respSet.add(npc);
+			}
+		}
+		chunksARemoverDoRespSet.clear();
+		respSetComNulls.clear();
+		System.out.println("############################");
+		
 		for (NormalizedPLACEChunk respChunk : respSet) {
 		
 			Iterator<NormalizedPLACEChunk> it = refSet.iterator();
@@ -148,28 +189,52 @@ public class NormalizedPlaceChunkingEvaluation extends ChunkingEvaluation{
 			boolean flag = false;
 			while(it.hasNext()){
 				NormalizedPLACEChunk nChunk = it.next();
+				
+				System.out.println("#################################");
+				System.out.println("respChunk start: " + respChunk.start());
+				System.out.println("respChunk end: " + respChunk.end());
+				
+				System.out.println("nChunk start: " + nChunk.start());
+				System.out.println("nChunk end: " + nChunk.end());
+				
+				if((nChunk.start()==respChunk.start()) && (nChunk.end()==respChunk.end())){
+					System.out.println("nChunk.getLatitude: " + nChunk.getLatitude());
+					System.out.println("nChunk.getLongitude: " + nChunk.getLongitude());
+					
+					System.out.println("respChunk.getLatitude: " + respChunk.getLatitude());
+					System.out.println("respChunk.getLongitude: " + respChunk.getLongitude());
+				}
 				if (nChunk.equals(respChunk)){
+					System.out.println("Este vai para os TP! lat: " + respChunk.getLatitude() + " lon: " + respChunk.getLongitude() + " start: " + respChunk.start() + " end: " + respChunk.end());
 					mTruePositiveSet.add(ccs);
 					it.remove();
 					flag = true;
 					break;
-				}	
+				}
+				
 			}
-			if (!flag)
+			if (!flag){
+				System.out.println("Este vai para os FP! lat: " + respChunk.getLatitude() + " lon: " + respChunk.getLongitude() + " start: " + respChunk.start() + " end: " + respChunk.end());
 				mFalsePositiveSet.add(ccs);
+			}
 		}
 
+		System.out.println("Antes For FN");
 		for (NormalizedPLACEChunk refChunk : refSet) {
+			System.out.println("Este vai para os FN! lat: " + refChunk.getLatitude() + " lon: " + refChunk.getLongitude() + " start: " + refChunk.start() + " end: " + refChunk.end());
 			mFalseNegativeSet.add(new ChunkAndCharSeq(refChunk,cSeq));
 		}
+		
+		System.out.println("#################################");
 	}
 
 	static Set<NormalizedPLACEChunk> unscoredNormalizedChunkSet(Chunking chunking) {
         Set<NormalizedPLACEChunk> result = new HashSet<NormalizedPLACEChunk>();
         for (Chunk chunk : chunking.chunkSet()){
-            //System.out.println("LALALA: " + chunk.start() + " " + chunk.end() + " " + chunk.toString());
+            //NormalizedPLACEChunk newChunk = new NormalizedPLACEChunk(chunk);
+        	//System.out.println("chunk): " + chunk);
+        	NormalizedPLACEChunk newChunk = ((NormalizedPLACEChunk)chunk);
             
-            NormalizedPLACEChunk newChunk = new NormalizedPLACEChunk(chunk);
         	result.add(newChunk);
         }
         return result;

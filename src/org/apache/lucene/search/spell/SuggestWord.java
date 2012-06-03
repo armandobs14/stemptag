@@ -1,4 +1,4 @@
-package placerefs.gazetteer;
+package org.apache.lucene.search.spell;
 
 public final class SuggestWord implements Comparable<SuggestWord> {
 
